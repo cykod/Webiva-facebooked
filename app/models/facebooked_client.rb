@@ -70,28 +70,33 @@ class FacebookedClient
     @session ||= MiniFB::Session.new @api_key, @secret, self.session_key, self.uid
   end
 
-  def expireSession
-    begin
-      MiniFB.call(@api_key, @secret, 'facebook.auth.expiresession', 'session_key' => self.session_key)
-    rescue Exception => e
-      logger.error('facebook.auth.expireSession failed: ' + e)
-    end
-  end
-
   def clear_cookies(cookies)
     cookies.each do |k,v|
       cookies.delete k if k.to_s.include?(@api_key)
     end
   end
 
+  def expire_session
+    self.call('auth.expiresession')
+  end
+
+  def has_app_permission(extended_permissions)
+    extended_permissions = extended_permissions.join(',') if extended_permissions.is_a?(Array)
+    self.call('users.hasAppPermission', 'ext_perm' => extended_permissions)
+  end
+
   def query(query)
-    logger.info "FQL.Query:  #{query}"
     options = {'query' => query}
+    self.call('fql.query', options)
+  end
+
+  def call(method, options={})
     options['session_key'] = self.session_key if self.session_key
+    logger.info "Facebook API Call: #{method} with #{options}"
     begin
-      MiniFB.call(@api_key, @secret, 'fql.query', options)
+      MiniFB.call(@api_key, @secret, method, options)
     rescue Exception => e
-      logger.error "query failed: #{e}"
+      logger.error "#{method} failed: #{e}"
       nil
     end
   end

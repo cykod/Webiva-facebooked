@@ -1,6 +1,8 @@
 
 class FacebookedUser < DomainModel
 
+  cached_content
+
   belongs_to :end_user
   validates_uniqueness_of :uid
 

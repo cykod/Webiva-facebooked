@@ -47,14 +47,19 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :api_key => nil, :secret => nil
+    attributes :api_key => nil, :secret => nil, :email_permission => nil
 
     validates_presence_of :api_key, :secret
 
     options_form(
                  fld(:api_key, :text_field, :label => 'API Key'),
-                 fld(:secret, :text_field, :label => 'Secret')
+                 fld(:secret, :text_field, :label => 'Secret'),
+                 fld(:email_permission, :select, :options => :email_permission_options, :label => 'Permission to email')
                  )
+
+    def self.email_permission_options
+      [['Not Required', nil], ['Required', 'required']]
+    end
 
     def feature_loader_url
       'http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php/en_US'

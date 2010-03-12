@@ -13,6 +13,12 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
       fb_user_tags(c, 'user')
 
+      c.define_tag("user:logout") do |t|
+        logout_url = "#{self.site_node.node_path}?cms_logout=1"
+        options = (t.attr || {}).merge('href' => 'javascript:void(0);', 'onclick' => "Facebooked.logout('#{logout_url}')")
+        content_tag('a', t.expand || 'Log out'.t, options)
+      end
+
       fb_login_tags(c, 'no_user', data[:onlogin])
     end
   end
@@ -44,12 +50,6 @@ class Facebooked::ConnectFeature < ParagraphFeature
     context.define_tag("#{base}:pronoun") do |t|
       options = {'uid' => t.locals.user.uid, 'useyou' => 'false'}.merge(t.attr)
       fbml_tag('pronoun', t.expand, options)
-    end
-
-    context.define_tag("#{base}:logout") do |t|
-      logout_url = "#{self.site_node.node_path}?cms_logout=1"
-      options = (t.attr || {}).merge('href' => 'javascript:void(0);', 'onclick' => "FB.Connect.logoutAndRedirect('#{logout_url}')")
-      content_tag('a', t.expand || 'Log out'.t, options)
     end
   end
 
