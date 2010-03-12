@@ -5,11 +5,14 @@ class FacebookedClient
 
   CLIENT_CACHE_KEY = 'FacebookedClient::MiniFB'
 
-  def self.client(app_id=nil, secret=nil)
+  def self.client(api_key=nil, secret=nil)
     client = DataCache.local_cache CLIENT_CACHE_KEY
     return client if client
 
-    client = FacebookedClient.new(app_id, secret)
+    raise "FacebookedClient was not initialized" unless api_key && secret
+
+    client = FacebookedClient.new(api_key, secret)
+    DataCache.put_local_cache CLIENT_CACHE_KEY, client
   end
 
   def initialize(api_key, secret)
@@ -49,7 +52,47 @@ class FacebookedClient
     @session_key ||= @fb_params['fb_sig_session_key']
   end
 
+  def session_secret
+    @session_secret ||= @fb_params['fb_sig_ss']
+  end
+
+  def session_expires
+    return @session_expires if @session_expires
+
+    if @fb_params['fb_sig_expires']
+      @session_expires = Time.at(@fb_params['fb_sig_expires'].to_i)
+    else
+      nil
+    end
+  end
+
   def session
     @session ||= MiniFB::Session.new @api_key, @secret, self.session_key, self.uid
+  end
+
+  def expireSession
+    begin
+      MiniFB.call(@api_key, @secret, 'facebook.auth.expiresession', 'session_key' => self.session_key)
+    rescue Exception => e
+      logger.error('facebook.auth.expireSession failed: ' + e)
+    end
+  end
+
+  def clear_cookies(cookies)
+    cookies.each do |k,v|
+      cookies.delete k if k.to_s.include?(@api_key)
+    end
+  end
+
+  def query(query)
+    logger.info "FQL.Query:  #{query}"
+    options = {'query' => query}
+    options['session_key'] = self.session_key if self.session_key
+    begin
+      MiniFB.call(@api_key, @secret, 'fql.query', options)
+    rescue Exception => e
+      logger.error "query failed: #{e}"
+      nil
+    end
   end
 end
