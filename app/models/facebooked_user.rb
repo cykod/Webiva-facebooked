@@ -6,12 +6,14 @@ class FacebookedUser < DomainModel
   belongs_to :end_user
   validates_uniqueness_of :uid
 
+  named_scope :active_users, :conditions => 'email IS NOT NULL'
+
   def self.push_facebook_user(client, myself, options={})
     return nil unless client.uid
 
     fb_user = self.find_by_uid(client.uid)
     if fb_user.nil?
-      user = client.session.user
+      user = client.user
       return nil unless user && user.uid
 
       if myself.id.nil?
@@ -21,7 +23,7 @@ class FacebookedUser < DomainModel
 
       fb_user = self.create :uid => client.uid, :email => user['email'], :end_user_id => myself.id
     elsif ! fb_user.active?
-      user = client.session.user
+      user = client.user
       return nil unless user && user.uid
 
       fb_user.update_attributes :email => user['email']
@@ -31,7 +33,7 @@ class FacebookedUser < DomainModel
   end
 
   def self.facebook_end_user_data(client)
-    user = client.session.user
+    user = client.user
     data = {
       :first_name => user['first_name'],
       :last_name => user['last_name'],

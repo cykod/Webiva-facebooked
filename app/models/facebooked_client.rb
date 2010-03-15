@@ -70,6 +70,15 @@ class FacebookedClient
     @session ||= MiniFB::Session.new @api_key, @secret, self.session_key, self.uid
   end
 
+  def user
+    begin
+      self.session.user
+    rescue MiniFB::FaceBookError => e
+      logger.error e
+      nil
+    end
+  end
+
   def clear_cookies(cookies)
     cookies.each do |k,v|
       cookies.delete k if k.to_s.include?(@api_key)

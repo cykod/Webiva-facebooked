@@ -3,6 +3,8 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
   features '/facebooked/connect_feature'
 
   paragraph :login
+  paragraph :visitors
+  paragraph :user
 
   def login
     @options = paragraph_options(:login)
@@ -16,33 +18,36 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     if @logged_in
       @fb_user = FacebookedUser.push_facebook_user self.facebook_client, myself
 
-      if myself.id != @fb_user.end_user_id
-        paragraph_action(@fb_user.end_user.action('/facebook/connect/login'))
-        process_login @fb_user.end_user
+      if @fb_user
+        if myself.id != @fb_user.end_user_id
+          paragraph_action(@fb_user.end_user.action('/facebook/connect/login'))
+          process_login @fb_user.end_user
 
-        if @options.access_token_id && ! myself.has_token?(@options.access_token_id)
-          redirect_paragraph :site_node => @options.edit_account_page_id
-        elsif @options.forward_login == 'yes' && session[:lock_lockout]
-          lock_logout = session[:lock_lockout]
-          session[:lock_lockout] = nil
-          redirect_paragraph lock_logout
-        elsif @options.destination_page_id
-          redirect_paragraph :site_node => @options.destination_page_id
-        else
-          redirect_paragraph :page
-        end
-
-        return
-      elsif @options.access_token_id && session[:fb_access_token] != @options.access_token_id
-        if ! myself.has_token?(@options.access_token_id)
-          if self.site_node.id != @options.edit_account_page_id
+          if @options.access_token_id && ! myself.has_token?(@options.access_token_id)
             redirect_paragraph :site_node => @options.edit_account_page_id
-            return
+          elsif @options.forward_login == 'yes' && session[:lock_lockout]
+            lock_logout = session[:lock_lockout]
+            session[:lock_lockout] = nil
+            redirect_paragraph lock_logout
+          elsif @options.destination_page_id
+            redirect_paragraph :site_node => @options.destination_page_id
+          else
+            redirect_paragraph :page
           end
-        else
-          session[:fb_access_token] = @options.access_token_id
+
+          return
+        elsif @options.access_token_id && session[:fb_access_token] != @options.access_token_id
+          if ! myself.has_token?(@options.access_token_id)
+            if self.site_node.id != @options.edit_account_page_id
+              redirect_paragraph :site_node => @options.edit_account_page_id
+              return
+            end
+          else
+            session[:fb_access_token] = @options.access_token_id
+          end
         end
       end
+
     elsif params[:cms_logout]
       paragraph_action(myself.action('/facebook/connect/logout')) if myself.id
       process_logout
@@ -53,6 +58,35 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     render_paragraph :feature => :facebooked_connect_login
   end
 
+  def visitors
+    @options = paragraph_options(:visitors)
+
+    user_page = (params[:fb_user_page] || 1).to_i
+
+    @pages, @visitors = FacebookedUser.active_users.paginate(user_page, :per_page => @options.visitors_to_display, :order => 'created_at DESC' )
+
+    render_paragraph :feature => :facebooked_connect_visitors
+  end
+
+  def user
+    @options = paragraph_options(:user)
+
+    @logged_in = self.facebook_client.validate_fb_cookies(cookies)
+
+    @fb_user_id = @options.facebook_user_id
+    if @fb_user_id.nil? && @logged_in
+      @fb_user_id = self.facebook_client.uid
+    end
+
+    display_string = @logged_in ? 'logged_in' : 'not_logged_in'
+    display_string << "_#{@fb_user_id}"
+    result = renderer_cache(nil, display_string) do |cache|
+      @fb_user = FacebookedUser.find_by_uid(@fb_user_id) || FacebookedUser.new(@fb_user_id)
+      cache[:output] = facebooked_connect_user_feature
+    end
+
+    render_paragraph :text => result.output
+  end
 
   protected
 

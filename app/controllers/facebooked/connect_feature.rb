@@ -1,11 +1,10 @@
 class Facebooked::ConnectFeature < ParagraphFeature
 
-
   feature :facebooked_connect_login, :default_feature => <<-FEATURE
     <cms:no_user><cms:login_button/></cms:no_user>
     <cms:user><cms:profile_pic/> <cms:name/> <cms:logout>log out</cms:logout></cms:user>
+    <cms:connect_form/>
   FEATURE
-  
 
   def facebooked_connect_login_feature(data)
     webiva_feature(:facebooked_connect_login,data) do |c|
@@ -20,6 +19,35 @@ class Facebooked::ConnectFeature < ParagraphFeature
       end
 
       fb_login_tags(c, 'no_user', data[:onlogin])
+    end
+  end
+
+  feature :facebooked_connect_visitors, :default_feature => <<-FEATURE
+  <cms:users>
+    <h3>Latest Visitors</h3>
+    <cms:user>
+     <cms:profile_pic linked="true"/>
+     <cms:multiple value="3"><br/></cms:multiple>
+    </cms:user>
+  </cms:users>
+  FEATURE
+
+  def facebooked_connect_visitors_feature(data)
+    webiva_feature(:facebooked_connect_visitors,data) do |c|
+      c.loop_tag('user') { |t| data[:visitors] }
+        fb_user_tags(c, 'user')
+      c.pagelist_tag('pages', :field => 'fb_user_page' ) { |t| data[:pages] }
+    end
+  end
+
+  feature :facebooked_connect_user, :default_feature => <<-FEATURE
+    <cms:user><cms:profile_pic/> <cms:name/></cms:user>
+  FEATURE
+
+  def facebooked_connect_user_feature(data)
+    webiva_feature(:facebooked_connect_user,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
     end
   end
 
@@ -53,7 +81,19 @@ class Facebooked::ConnectFeature < ParagraphFeature
     end
   end
 
+  def fb_connect_form(context, data)
+    context.define_tag('connect_form') do |t|
+      width = t.attr['width'] || 600
+      serverfbml_tag('connect-form', "\n", 'serverfbml' => {'style' => "width:#{width}px;"}, 'action' => Configuration.domain_link('/'))
+    end
+  end
+
   def fbml_tag(name, content=nil, options={})
     content_tag("fb:#{name}", content, options)
+  end
+
+  def serverfbml_tag(name, content=nil, options={})
+    serverfbml_options = options.delete('serverfbml') || {}
+    fbml_tag('serverfbml', "\n" + content_tag('script', "\n" + fbml_tag(name, content, options) + "\n", 'type' => 'text/fbml') + "\n", serverfbml_options) + "\n"
   end
 end
