@@ -19,6 +19,8 @@ class Facebooked::ConnectFeature < ParagraphFeature
       end
 
       fb_login_tags(c, 'no_user', data[:onlogin])
+
+      fb_connect_form(c, data)
     end
   end
 
@@ -48,6 +50,37 @@ class Facebooked::ConnectFeature < ParagraphFeature
     webiva_feature(:facebooked_connect_user,data) do |c|
       c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
       fb_user_tags(c, 'user')
+    end
+  end
+
+  feature :facebooked_connect_fan_box, :default_feature => <<-FEATURE
+    <cms:fan_box/>
+  FEATURE
+
+  def facebooked_connect_fan_box_feature(data)
+    webiva_feature(:facebooked_connect_fan_box,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('fan_box') do |t|
+        options = {
+          'stream' => data[:options].stream ? 1 : 0,
+          'connections' => data[:options].connections,
+          'width' => data[:options].width,
+          'height' => data[:options].height,
+          'logobar' => data[:options].logobar ? 1 : 0
+        }
+
+        if data[:options].profile_id
+          options['profile_id'] = data[:options].profile_id
+        else
+          options['name'] = data[:options].name
+        end
+
+        options['css'] = data[:options].css_file.full_url if data[:options].css_file
+
+        fbml_tag('fan', nil, options)
+      end
     end
   end
 
@@ -94,6 +127,6 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
   def serverfbml_tag(name, content=nil, options={})
     serverfbml_options = options.delete('serverfbml') || {}
-    fbml_tag('serverfbml', "\n" + content_tag('script', "\n" + fbml_tag(name, content, options) + "\n", 'type' => 'text/fbml') + "\n", serverfbml_options) + "\n"
+    fbml_tag('serverfbml', "\n" + content_tag('script', "\n" + fbml_tag('fbml', "\n" + fbml_tag(name, content, options) + "\n") + "\n", 'type' => 'text/fbml') + "\n", serverfbml_options) + "\n"
   end
 end
