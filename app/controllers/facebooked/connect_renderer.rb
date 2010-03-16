@@ -6,6 +6,7 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
   paragraph :visitors
   paragraph :user
   paragraph :fan_box
+  paragraph :comments
 
   def login
     @options = paragraph_options(:login)
@@ -103,6 +104,23 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     end
 
     render_paragraph :text => result.output
+  end
+
+  def comments
+    @options = paragraph_options(:comments)
+
+    @logged_in = self.facebook_client.validate_fb_cookies(cookies)
+    @fb_user_id = self.facebook_client.uid if @logged_in
+
+    display_string = @logged_in ? 'logged_in' : 'not_logged_in'
+    display_string << "_#{@fb_user_id}"
+    result = renderer_cache(nil, display_string) do |cache|
+      @fb_user = FacebookedUser.find_by_uid(@fb_user_id) if @fb_user_id
+      cache[:output] = facebooked_connect_comments_feature
+    end
+
+    @xid = @options.xid.blank? ? CGI::escape(paragraph_page_url) : @options.xid
+    render_paragraph :text => result.output.gsub('%%CMS:XID%%', @xid)
   end
 
   protected

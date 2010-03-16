@@ -84,6 +84,34 @@ class Facebooked::ConnectFeature < ParagraphFeature
     end
   end
 
+  feature :facebooked_connect_comments, :default_feature => <<-FEATURE
+    <cms:comments/>
+  FEATURE
+
+  def facebooked_connect_comments_feature(data)
+    webiva_feature(:facebooked_connect_comments,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('comments') do |t|
+        options = {
+          'xid' => '%%CMS:XID%%',
+          'numposts' => data[:options].numposts,
+          'width' => data[:options].width,
+          'simple' => data[:options].simple ? 1 : 0,
+          'reverse' => data[:options].reverse ? 1 : 0,
+          'publish_feed' => data[:options].publish_feed ? 1 : 0,
+        }
+
+        options['title'] = data[:options].title unless data[:options].title.blank?
+        options['url'] = data[:options].url unless data[:options].url.blank?
+        options['css'] = data[:options].css_file.full_url if data[:options].css_file
+
+        fbml_tag('comments', nil, options)
+      end
+    end
+  end
+
   def fb_login_tags(context, base='no_user', onlogin=nil)
     onlogin ||= 'window.location.reload(true);'
     context.define_tag("#{base}:login_button") do |t|

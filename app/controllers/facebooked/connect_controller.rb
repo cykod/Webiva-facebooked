@@ -6,6 +6,7 @@ class Facebooked::ConnectController < ParagraphController
   editor_for :visitors, :name => "Facebook Visitors", :feature => :facebooked_connect_visitors
   editor_for :user, :name => "Facebook User", :feature => :facebooked_connect_user
   editor_for :fan_box, :name => "Facebook Fan Box", :feature => :facebooked_connect_fan_box
+  editor_for :comments, :name => "Facebook Comments", :feature => :facebooked_connect_comments
 
   class LoginOptions < HashModel
     attributes :destination_page_id => nil, :access_token_id => nil, :forward_login => 'yes', :edit_account_page_id => nil
@@ -65,7 +66,7 @@ class Facebooked::ConnectController < ParagraphController
                  fld(:connections, :text_field, :label => 'Number of users to display'),
                  fld(:width, :text_field),
                  fld(:height, :text_field),
-                 fld(:css_file_id, :filemanager_file, :label => 'CSS file to use.'),
+                 fld(:css_file_id, :filemanager_file, :label => 'CSS file to use'),
                  fld(:logobar, :check_box, :label => 'Display Facebook logo bar')
                  )
 
@@ -82,6 +83,33 @@ class Facebooked::ConnectController < ParagraphController
       errors.add(:width, 'too small must be at least 200') if self.width < 200
       errors.add(:height, 'too small must be at least 64') if self.height < 64
 
+      errors.add(:css_file_id, 'must be a CSS file') if self.css_file && self.css_file.mime_type != 'text/css'
+    end
+
+    def css_file
+      @css_file ||= DomainFile.find_by_id(self.css_file_id)
+    end
+  end
+
+  class CommentsOptions < HashModel
+    attributes :xid => nil, :numposts => 10, :width => 550, :css_file_id => nil, :title => nil, :url => nil, :simple => false, :reverse => false, :publish_feed => false
+
+    integer_options :numposts, :width, :css_file_id
+    boolean_options :simple, :reverse, :publish_feed
+
+    options_form(
+                 fld(:xid, :text_field, :label => "Unique ID", :description => '(leave blank to use the current path)'),
+                 fld(:numposts, :text_field, :label => 'Number of post to display'),
+                 fld(:width, :text_field),
+                 fld(:css_file_id, :filemanager_file, :label => 'CSS file to use'),
+                 fld(:title, :text_field),
+                 fld(:url, :text_field, :label => 'URL to the page the comment was made', :description => '(default is window.document.location.href)'),
+                 fld(:simple, :check_box, :label => "Don't display rounded corners"),
+                 fld(:reverse, :check_box, :label => "Reverse the ordering"),
+                 fld(:publish_feed, :check_box, :label => "Publish post to user's feed")
+                 )
+
+    def validate
       errors.add(:css_file_id, 'must be a CSS file') if self.css_file && self.css_file.mime_type != 'text/css'
     end
 
