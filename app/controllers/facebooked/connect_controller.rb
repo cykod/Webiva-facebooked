@@ -7,6 +7,7 @@ class Facebooked::ConnectController < ParagraphController
   editor_for :user, :name => "Facebook User", :feature => :facebooked_connect_user
   editor_for :fan_box, :name => "Facebook Fan Box", :feature => :facebooked_connect_fan_box
   editor_for :comments, :name => "Facebook Comments", :feature => :facebooked_connect_comments
+  editor_for :live_stream, :name => "Facebook Live Stream", :feature => :facebooked_connect_live_stream
 
   class LoginOptions < HashModel
     attributes :destination_page_id => nil, :access_token_id => nil, :forward_login => 'yes', :edit_account_page_id => nil
@@ -111,10 +112,27 @@ class Facebooked::ConnectController < ParagraphController
 
     def validate
       errors.add(:css_file_id, 'must be a CSS file') if self.css_file && self.css_file.mime_type != 'text/css'
+      errors.add(:xid, 'can contain only letters, numbers, percents(%), dashes(-) and underscores(_)') if self.xid && self.xid =~ /[^a-zA-Z0-9%_-]/
     end
 
     def css_file
       @css_file ||= DomainFile.find_by_id(self.css_file_id)
+    end
+  end
+
+  class LiveStreamOptions < HashModel
+    attributes :event_app_id => nil, :apikey => nil, :xid => 'default', :width => 450, :height => 400
+
+    integer_options :event_app_id, :width, :height
+
+    options_form(
+                 fld(:xid, :text_field, :label => "Unique ID"),
+                 fld(:width, :text_field),
+                 fld(:height, :text_field)
+                 )
+
+    def validate
+      errors.add(:xid, 'can contain only letters, numbers and underscores(_)') if self.xid && self.xid =~ /[^a-zA-Z0-9_]/
     end
   end
 end

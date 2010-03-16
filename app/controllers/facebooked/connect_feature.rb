@@ -43,7 +43,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
   end
 
   feature :facebooked_connect_user, :default_feature => <<-FEATURE
-    <cms:user><cms:profile_pic/> <cms:name/></cms:user>
+    <cms:user><cms:profile_pic/> <cms:name/> <cms:bookmark/></cms:user>
   FEATURE
 
   def facebooked_connect_user_feature(data)
@@ -112,6 +112,27 @@ class Facebooked::ConnectFeature < ParagraphFeature
     end
   end
 
+  feature :facebooked_connect_live_stream, :default_feature => <<-FEATURE
+    <cms:live_stream/>
+  FEATURE
+
+  def facebooked_connect_live_stream_feature(data)
+    webiva_feature(:facebooked_connect_live_stream,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('live_stream') do |t|
+        options = {
+          'xid' => data[:options].xid,
+          'width' => data[:options].width,
+          'height' => data[:options].height
+        }
+
+        fbml_tag('live-stream', nil, options)
+      end
+    end
+  end
+
   def fb_login_tags(context, base='no_user', onlogin=nil)
     onlogin ||= 'window.location.reload(true);'
     context.define_tag("#{base}:login_button") do |t|
@@ -139,6 +160,11 @@ class Facebooked::ConnectFeature < ParagraphFeature
     context.define_tag("#{base}:pronoun") do |t|
       options = {'uid' => t.locals.user.uid, 'useyou' => 'false'}.merge(t.attr)
       fbml_tag('pronoun', t.expand, options)
+    end
+
+    context.define_tag("#{base}:bookmark") do |t|
+      options = {'type' => 'off-facebook'}.merge(t.attr)
+      fbml_tag('bookmark', nil, options)
     end
   end
 
