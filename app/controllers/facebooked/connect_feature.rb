@@ -1,5 +1,7 @@
 class Facebooked::ConnectFeature < ParagraphFeature
 
+  include FacebookedHelper
+
   feature :facebooked_connect_login, :default_feature => <<-FEATURE
     <cms:no_user><cms:login_button/></cms:no_user>
     <cms:user><cms:profile_pic/> <cms:name/> <cms:logout>log out</cms:logout></cms:user>
@@ -150,6 +152,21 @@ class Facebooked::ConnectFeature < ParagraphFeature
         }
 
         fbml_tag('share-button', nil, options)
+      end
+    end
+  end
+
+  feature :facebooked_connect_stream_publish, :default_feature => <<-FEATURE
+    <cms:stream_publish_link>Publish</cms:stream_publish_link>
+  FEATURE
+
+  def facebooked_connect_stream_publish_feature(data)
+    webiva_feature(:facebooked_connect_stream_publish,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('stream_publish_link') do |t|
+        content_tag('a', t.expand, 'href' => 'javascript:void(0);', 'onclick' => publish_stream(data[:options].stream))
       end
     end
   end

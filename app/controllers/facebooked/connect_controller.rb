@@ -9,6 +9,7 @@ class Facebooked::ConnectController < ParagraphController
   editor_for :comments, :name => "Facebook Comments", :feature => :facebooked_connect_comments
   editor_for :live_stream, :name => "Facebook Live Stream", :feature => :facebooked_connect_live_stream
   editor_for :share_button, :name => "Facebook Share Button", :feature => :facebooked_connect_share_button
+  editor_for :stream_publish, :name => "Facebook Stream Publish", :feature => :facebooked_connect_stream_publish
 
   class LoginOptions < HashModel
     attributes :destination_page_id => nil, :access_token_id => nil, :forward_login => 'yes', :edit_account_page_id => nil
@@ -147,6 +148,20 @@ class Facebooked::ConnectController < ParagraphController
 
     def self.type_options
       [['Box Count', 'box_count'], ['Button Count', 'button_count'], ['Button', 'button'], ['Icon', 'icon'], ['Icon Link', 'icon_link']]
+    end
+  end
+
+  class StreamPublishOptions < HashModel
+    attributes :name => nil, :href => nil, :description => nil
+
+    options_form(
+                 fld(:name, :text_field),
+                 fld(:href, :text_field),
+                 fld(:description, :text_area)
+                 )
+
+    def stream
+      @stream ||= FacebookedStreamPublish.new(self.name, self.href, self.description)
     end
   end
 end
