@@ -8,6 +8,7 @@ class Facebooked::ConnectController < ParagraphController
   editor_for :fan_box, :name => "Facebook Fan Box", :feature => :facebooked_connect_fan_box
   editor_for :comments, :name => "Facebook Comments", :feature => :facebooked_connect_comments
   editor_for :live_stream, :name => "Facebook Live Stream", :feature => :facebooked_connect_live_stream
+  editor_for :share_button, :name => "Facebook Share Button", :feature => :facebooked_connect_share_button
 
   class LoginOptions < HashModel
     attributes :destination_page_id => nil, :access_token_id => nil, :forward_login => 'yes', :edit_account_page_id => nil
@@ -133,6 +134,19 @@ class Facebooked::ConnectController < ParagraphController
 
     def validate
       errors.add(:xid, 'can contain only letters, numbers and underscores(_)') if self.xid && self.xid =~ /[^a-zA-Z0-9_]/
+    end
+  end
+
+  class ShareButtonOptions < HashModel
+    attributes :class_name => 'url', :url => nil, :type => 'icon_link'
+
+    options_form(
+                 fld(:url, :text_field, :label => "URL to share"),
+                 fld(:type, :select, :options => :type_options)
+                 )
+
+    def self.type_options
+      [['Box Count', 'box_count'], ['Button Count', 'button_count'], ['Button', 'button'], ['Icon', 'icon'], ['Icon Link', 'icon_link']]
     end
   end
 end

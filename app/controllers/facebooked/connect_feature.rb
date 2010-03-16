@@ -133,6 +133,27 @@ class Facebooked::ConnectFeature < ParagraphFeature
     end
   end
 
+  feature :facebooked_connect_share_button, :default_feature => <<-FEATURE
+    <cms:share_button/>
+  FEATURE
+
+  def facebooked_connect_share_button_feature(data)
+    webiva_feature(:facebooked_connect_share_button,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('share_button') do |t|
+        options = {
+          'class' => data[:options].class_name,
+          'type' => data[:options].type,
+          'url' => '%%CMS:URL%%'
+        }
+
+        fbml_tag('share-button', nil, options)
+      end
+    end
+  end
+
   def fb_login_tags(context, base='no_user', onlogin=nil)
     onlogin ||= 'window.location.reload(true);'
     context.define_tag("#{base}:login_button") do |t|

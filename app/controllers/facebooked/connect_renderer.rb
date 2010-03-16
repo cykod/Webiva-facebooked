@@ -8,6 +8,7 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
   paragraph :fan_box
   paragraph :comments
   paragraph :live_stream
+  paragraph :share_button
 
   def login
     @options = paragraph_options(:login)
@@ -138,6 +139,23 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     end
 
     render_paragraph :text => result.output
+  end
+
+  def share_button
+    @options = paragraph_options(:share_button)
+
+    @logged_in = self.facebook_client.validate_fb_cookies(cookies)
+    @fb_user_id = self.facebook_client.uid if @logged_in
+
+    display_string = @logged_in ? 'logged_in' : 'not_logged_in'
+    display_string << "_#{@fb_user_id}"
+    result = renderer_cache(nil, display_string) do |cache|
+      @fb_user = FacebookedUser.find_by_uid(@fb_user_id) if @fb_user_id
+      cache[:output] = facebooked_connect_share_button_feature
+    end
+
+    @url = @options.url.blank? ? Configuration.domain_link(paragraph_page_url) : @options.url
+    render_paragraph :text => result.output.gsub('%%CMS:URL%%', @url)
   end
 
   protected
