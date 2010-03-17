@@ -86,7 +86,9 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     display_string = @logged_in ? 'logged_in' : 'not_logged_in'
     display_string << "_#{@fb_user_id}"
     result = renderer_cache(nil, display_string) do |cache|
-      @fb_user = FacebookedUser.find_by_uid(@fb_user_id) || FacebookedUser.new(@fb_user_id)
+      if @fb_user_id
+        @fb_user = FacebookedUser.find_by_uid(@fb_user_id) || FacebookedUser.new(@fb_user_id)
+      end
       cache[:output] = facebooked_connect_user_feature
     end
 

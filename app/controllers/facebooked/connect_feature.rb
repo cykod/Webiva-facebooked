@@ -5,7 +5,6 @@ class Facebooked::ConnectFeature < ParagraphFeature
   feature :facebooked_connect_login, :default_feature => <<-FEATURE
     <cms:no_user><cms:login_button/></cms:no_user>
     <cms:user><cms:profile_pic/> <cms:name/> <cms:logout>log out</cms:logout></cms:user>
-    <cms:connect_form/>
   FEATURE
 
   def facebooked_connect_login_feature(data)
@@ -21,8 +20,6 @@ class Facebooked::ConnectFeature < ParagraphFeature
       end
 
       fb_login_tags(c, 'no_user', data[:onlogin])
-
-      fb_connect_form(c, data)
     end
   end
 
@@ -30,7 +27,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
   <cms:users>
     <h3>Latest Visitors</h3>
     <cms:user>
-     <cms:profile_pic linked="true"/>
+     <cms:profile_pic size="square" linked="false"/>
      <cms:multiple value="3"><br/></cms:multiple>
     </cms:user>
   </cms:users>

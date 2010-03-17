@@ -2,7 +2,7 @@ class Facebooked::ConnectController < ParagraphController
 
   editor_header 'Facebook Paragraphs'
   
-  editor_for :login, :name => "Facebook Connect Login", :feature => :facebooked_connect_login
+  editor_for :login, :name => "Facebook Login", :feature => :facebooked_connect_login
   editor_for :visitors, :name => "Facebook Visitors", :feature => :facebooked_connect_visitors
   editor_for :user, :name => "Facebook User", :feature => :facebooked_connect_user
   editor_for :fan_box, :name => "Facebook Fan Box", :feature => :facebooked_connect_fan_box
