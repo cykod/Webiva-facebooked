@@ -10,6 +10,7 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
   paragraph :live_stream
   paragraph :share_button
   paragraph :stream_publish
+  paragraph :request_form
 
   def login
     @options = paragraph_options(:login)
@@ -175,6 +176,16 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
     end
 
     render_paragraph :text => result.output
+  end
+
+  def request_form
+    @options = paragraph_options(:request_form)
+
+    @logged_in = self.facebook_client.validate_fb_cookies(cookies)
+    @fb_user_id = self.facebook_client.uid if @logged_in
+
+    @fb_user = FacebookedUser.find_by_uid(@fb_user_id) if @fb_user_id
+    render_paragraph :feature => :facebooked_connect_request_form
   end
 
   protected

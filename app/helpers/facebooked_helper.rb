@@ -11,4 +11,32 @@ module FacebookedHelper
     actor_id = stream.actor_id ? stream.actor_id : 'null'
     "FB.Connect.streamPublish(\"#{vh stream.user_message}\", #{stream.attachment.to_h.to_json}, #{action_links}, #{target_id}, #{user_message_prompt}, #{callback}, #{auto_publish}, #{actor_id});"
   end
+
+  def request_form(form)
+    options = form.to_h
+
+    content = form.message
+    form.choices.each do |choice|
+      content << tag('fb:req-choice', choice.to_h)
+    end
+    options[:content] = content
+
+    options['serverfbml'] = {:style => "width:#{form.selector.width}px"}
+
+    content = fbml_tag('multi-friend-selector', nil, form.selector.to_h)
+    if form.selector.condensed
+      content << tag('fb:request-form-submit')
+    end
+
+    serverfbml_tag('request-form', content, options)
+  end
+
+  def fbml_tag(name, content=nil, options={})
+    content_tag("fb:#{name}", content, options)
+  end
+
+  def serverfbml_tag(name, content=nil, options={})
+    serverfbml_options = options.delete('serverfbml') || {}
+    fbml_tag('serverfbml', "\n" + content_tag('script', "\n" + fbml_tag('fbml', "\n" + fbml_tag(name, content, options) + "\n") + "\n", 'type' => 'text/fbml') + "\n", serverfbml_options) + "\n"
+  end
 end

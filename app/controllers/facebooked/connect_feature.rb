@@ -78,7 +78,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
         options['css'] = data[:options].css_file.full_url if data[:options].css_file
 
-        fbml_tag('fan', nil, options)
+        fbml_tag('fan', '', options)
       end
     end
   end
@@ -106,7 +106,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
         options['url'] = data[:options].url unless data[:options].url.blank?
         options['css'] = data[:options].css_file.full_url if data[:options].css_file
 
-        fbml_tag('comments', nil, options)
+        fbml_tag('comments', '', options)
       end
     end
   end
@@ -127,7 +127,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
           'height' => data[:options].height
         }
 
-        fbml_tag('live-stream', nil, options)
+        fbml_tag('live-stream', '', options)
       end
     end
   end
@@ -148,7 +148,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
           'url' => '%%CMS:URL%%'
         }
 
-        fbml_tag('share-button', nil, options)
+        fbml_tag('share-button', '', options)
       end
     end
   end
@@ -164,6 +164,28 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
       c.define_tag('stream_publish_link') do |t|
         content_tag('a', t.expand, 'href' => 'javascript:void(0);', 'onclick' => publish_stream(data[:options].stream))
+      end
+    end
+  end
+
+  feature :facebooked_connect_request_form, :default_feature => <<-FEATURE
+  <cms:user>
+    Request Form
+    <cms:request_form/>
+  </cms:user>
+  FEATURE
+
+  def facebooked_connect_request_form_feature(data)
+    webiva_feature(:facebooked_connect_request_form,data) do |c|
+      c.expansion_tag('user') { |t| t.locals.user = data[:fb_user] }
+      fb_user_tags(c, 'user')
+
+      c.define_tag('user:request_form') do |t|
+        request_form(data[:options].request_form)
+#        serverfbml_tag('request-form',
+#                       fbml_tag('multi-friend-selector', nil, :showborder => "false", :condensed =>"true", :actiontext => "Invite your friends to this network."),
+#                       :action => "http://doug.dev/about-us", :method => "POST", :invite => "false", :type => "sample network", :content => "This network is the best place on Facebook for viewing, sharing and giving friends the highest quality stuff. Join me on this network! <fb:req-choice url='http://www.facebook.com/login.php?api_key=78' label='Check out this network!' />", 'serverfbml' => {'style' => 'width:760px;'}
+#                       )
       end
     end
   end
@@ -199,7 +221,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
     context.define_tag("#{base}:bookmark") do |t|
       options = {'type' => 'off-facebook'}.merge(t.attr)
-      fbml_tag('bookmark', nil, options)
+      fbml_tag('bookmark', '', options)
     end
   end
 
@@ -208,14 +230,5 @@ class Facebooked::ConnectFeature < ParagraphFeature
       width = t.attr['width'] || 600
       serverfbml_tag('connect-form', "\n", 'serverfbml' => {'style' => "width:#{width}px;"}, 'action' => Configuration.domain_link('/'))
     end
-  end
-
-  def fbml_tag(name, content=nil, options={})
-    content_tag("fb:#{name}", content, options)
-  end
-
-  def serverfbml_tag(name, content=nil, options={})
-    serverfbml_options = options.delete('serverfbml') || {}
-    fbml_tag('serverfbml', "\n" + content_tag('script', "\n" + fbml_tag('fbml', "\n" + fbml_tag(name, content, options) + "\n") + "\n", 'type' => 'text/fbml') + "\n", serverfbml_options) + "\n"
   end
 end
