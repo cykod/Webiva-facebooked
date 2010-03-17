@@ -152,16 +152,94 @@ class Facebooked::ConnectController < ParagraphController
   end
 
   class StreamPublishOptions < HashModel
-    attributes :name => nil, :href => nil, :description => nil
+    attributes :name => nil, :href => nil, :description => nil, :media_file_id => nil, :flash_preview_file_id => nil,
+      :user_message => nil, :user_message_prompt => nil, :action_text => nil, :action_href => nil, :caption => nil, :image_href => nil,
+      :flash_width => nil, :flash_height => nil, :flash_expanded_width => nil, :flash_expanded_height => nil,
+      :mp3_title => nil, :mp3_artist => nil, :mp3_album => nil
+
+    validates_presence_of :href, :name, :description
+    validates_urlness_of :href
+
+    integer_options :flash_width, :flash_height, :flash_expanded_width, :flash_expanded_height, :media_file_id, :flash_preview_file_id
 
     options_form(
-                 fld(:name, :text_field),
-                 fld(:href, :text_field),
-                 fld(:description, :text_area)
+                 fld(:href, :text_field, :required => true),
+                 fld(:name, :text_field, :required => true),
+                 fld(:caption, :text_field),
+                 fld(:description, :text_field, :required => true),
+                 fld(:user_message, :text_field, :label => 'Default user message'),
+                 fld(:user_message_prompt, :text_field, :label => 'Prompt'),
+                 fld(:action_text, :text_field),
+                 fld(:action_href, :text_field),
+                 fld(:media_file_id, :filemanager_file, :label => 'Media', :description => 'image, flash or mp3', :type => 'all'),
+                 fld('Image', :header),
+                 fld(:image_href, :text_field, :label => 'Href', :description => 'uses main href by default'),
+                 fld('Flash', :header),
+                 fld(:flash_preview_file_id, :filemanager_image, :label => 'Preview'),
+                 fld(:flash_width, :text_field, :label => 'Width'),
+                 fld(:flash_height, :text_field, :label => 'Height'),
+                 fld(:flash_expanded_width, :text_field, :label => 'Expanded width'),
+                 fld(:flash_expanded_height, :text_field, :label => 'Expanded height'),
+                 fld('MP3', :header),
+                 fld(:mp3_title, :text_field, :label => 'Title'),
+                 fld(:mp3_artist, :text_field, :label => 'Artist'),
+                 fld(:mp3_album, :text_field, :label => 'Album')
                  )
 
+    def validate
+      errors.add(:action_text, 'is required') if ! self.action_text.blank? && self.action_href.blank?
+      errors.add(:action_href, 'is required') if ! self.action_href.blank? && self.action_text.blank?
+
+      if self.media_file
+        if self.media_file.mime_type == 'application/x-shockwave-flash'
+          errors.add(:flash_preview_file_id, 'is required') unless self.flash_preview_file
+          errors.add(:flash_preview_file_id, 'must be an image') if self.flash_preview_file && ! self.flash_preview_file.mime_type.include?('image')
+        elsif ! self.media_file.mime_type.include?('mp3') && ! self.media_file.mime_type.include?('image')
+          errors.add(:media_file_id, 'can only be an image, mp3 or flash file')
+        end
+      end
+
+    end
+
+    def media_file
+      @media_file ||= DomainFile.find_by_id(self.media_file_id)
+    end
+
+    def flash_preview_file
+      @flash_preview_file ||= DomainFile.find_by_id(self.flash_preview_file_id)
+    end
+
     def stream
-      @stream ||= FacebookedStreamPublish.new(self.name, self.href, self.description)
+      return @stream if @stream
+      @stream = FacebookedStreamPublish.new(self.name, self.href, self.description)
+      if ! self.action_text.blank?
+        @stream.add_action_link(self.action_text, self.action_href)
+      end
+
+      @stream.user_message = self.user_message unless self.user_message.blank?
+      @stream.user_message_prompt = self.user_message_prompt unless self.user_message_prompt.blank?
+
+      @stream.attachment.caption = self.caption unless self.caption.blank?
+
+      if self.media_file
+        if self.media_file.mime_type.include?('image')
+          link = self.image_href.blank? ? self.href : self.image_href
+          @stream.attachment.add_image(self.media_file.full_url, link)
+        elsif self.media_file.mime_type.include?('mp3')
+          @stream.add_image.add_mp3(self.media_file.full_url, :title => self.mp3_title, :artist => self.mp3_artist, :album => self.mp3_album)
+        elsif self.media_file.mime_type == 'application/x-shockwave-flash'
+          options = {
+            :width => self.flash_width,
+            :height => self.flash_height,
+            :expanded_width => self.flash_expanded_width,
+            :expanded_height => self.flash_expanded_height
+          }
+          
+          @stream.attachment.add_flash(self.media_file.full_url, self.flash_preview_file.full_url, options)
+        end
+      end
+
+      @stream
     end
   end
 end
