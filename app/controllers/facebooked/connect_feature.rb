@@ -13,10 +13,12 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
       fb_user_tags(c, 'user')
 
-      c.define_tag("user:logout") do |t|
-        logout_url = "#{self.site_node.node_path}?cms_logout=1"
-        options = (t.attr || {}).merge('href' => 'javascript:void(0);', 'onclick' => "Facebooked.logout('#{logout_url}')")
-        content_tag('a', t.expand || 'Log out'.t, options)
+      c.link_tag("user:logout") do |t|
+        logout_url = "?cms_logout=1"
+        {
+          :onclick => "Facebooked.logout('#{logout_url}')",
+          :href => 'javascript:void(0);'
+        }
       end
 
       fb_login_tags(c, 'no_user', data[:onlogin])
@@ -187,41 +189,6 @@ class Facebooked::ConnectFeature < ParagraphFeature
 #                       :action => "http://doug.dev/about-us", :method => "POST", :invite => "false", :type => "sample network", :content => "This network is the best place on Facebook for viewing, sharing and giving friends the highest quality stuff. Join me on this network! <fb:req-choice url='http://www.facebook.com/login.php?api_key=78' label='Check out this network!' />", 'serverfbml' => {'style' => 'width:760px;'}
 #                       )
       end
-    end
-  end
-
-  def fb_login_tags(context, base='no_user', onlogin=nil)
-    onlogin ||= 'window.location.reload(true);'
-    context.define_tag("#{base}:login_button") do |t|
-      options = {'v' => 2, 'size' => 'small', 'onlogin' => onlogin}.merge(t.attr)
-      fbml_tag('login-button', t.expand || 'Connect with Facebook'.t, options)
-    end
-  end
-
-  def fb_user_tags(context, base='user')
-    context.define_tag("#{base}:name") do |t|
-      options = {'uid' => t.locals.user.uid, 'useyou' => 'false', 'linked' => 'false'}.merge(t.attr)
-      fbml_tag('name', t.expand, options)
-    end
-
-    context.define_tag("#{base}:profile_pic") do |t|
-      options = {'uid' => t.locals.user.uid, 'size' => 'thumb', 'linked' => 'false'}.merge(t.attr)
-      fbml_tag('profile-pic', t.expand, options)
-    end
-
-    context.define_tag("#{base}:status") do |t|
-      options = {'uid' => t.locals.user.uid, 'linked' => 'true'}.merge(t.attr)
-      fbml_tag('user-status', t.expand, options)
-    end
-
-    context.define_tag("#{base}:pronoun") do |t|
-      options = {'uid' => t.locals.user.uid, 'useyou' => 'false'}.merge(t.attr)
-      fbml_tag('pronoun', t.expand, options)
-    end
-
-    context.define_tag("#{base}:bookmark") do |t|
-      options = {'type' => 'off-facebook'}.merge(t.attr)
-      fbml_tag('bookmark', '', options)
     end
   end
 

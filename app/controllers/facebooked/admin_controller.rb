@@ -12,6 +12,7 @@ class Facebooked::AdminController < ModuleController
                                   ]
 
   register_handler :page, :post_process, 'FacebookedPageProcessor'
+  register_handler :editor, :auth_login_feature, "Facebooked::LoginExtension"
 
   cms_admin_paths "options",
     "Facebook Options" => { :action => 'index' },
