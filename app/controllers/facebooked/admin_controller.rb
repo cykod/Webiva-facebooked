@@ -15,7 +15,7 @@ class Facebooked::AdminController < ModuleController
   register_handler :editor, :auth_login_feature, "Facebooked::LoginExtension"
 
   cms_admin_paths "options",
-    "Facebook Options" => { :action => 'index' },
+    "Facebook Options" => { :action => 'options' },
     "Options" => { :controller => '/options' },
     "Modules" => { :controller => '/modules' },
     "Members" => { :controller => '/members' }
@@ -32,12 +32,18 @@ class Facebooked::AdminController < ModuleController
     if request.post? && @options.valid?
       Configuration.set_config_model(@options)
       flash[:notice] = "Updated Facebook module options".t 
-      redirect_to :controller => '/modules'
+      redirect_to :action => 'configure_facebook'
       return
     end    
   
   end
-  
+
+  def configure_facebook
+    cms_page_path ['Options','Modules', "Facebook Options"], "Configure Facebook"
+
+    @options = self.class.module_options
+  end
+
   def self.module_options(vals=nil)
     Configuration.get_config_model(Options,vals)
   end
@@ -48,11 +54,15 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :api_key => nil, :secret => nil, :email_permission => nil
+    attributes :application_name => nil, :application_id => nil, :api_key => nil, :secret => nil, :email_permission => nil
 
-    validates_presence_of :api_key, :secret
+    validates_presence_of :application_name, :application_id, :api_key, :secret
+
+    integer_options :application_id
 
     options_form(
+                 fld(:application_name, :text_field, :label => 'Application Name'),
+                 fld(:application_id, :text_field, :label => 'Application ID'),
                  fld(:api_key, :text_field, :label => 'API Key'),
                  fld(:secret, :text_field, :label => 'Secret'),
                  fld(:email_permission, :select, :options => :email_permission_options, :label => 'Permission to email')
