@@ -15,6 +15,8 @@ describe FacebookedUser do
   it "should create a new end_user" do
     myself = EndUser.new
     @facebooked_client = create_facebook_client
+    @facebooked_client.validate_fb_cookies(create_valid_facebook_cookies).should be_true
+    @facebooked_client.uid.should_not be_nil
 
     userdata = {'uid' => @facebooked_client.uid, 'email' => 'testapp-facebook-api-email@proxy.facebook.com'}
     mock_mini_fb_facebook_call("Users.getInfo", [userdata])

@@ -4,8 +4,6 @@ activate_module('facebooked')
 
 module FacebookedSpecHelper
   def facebook_sign_params(arguments, secret, namespace='fb_sig')
-    arguments.delete( namespace )
-
     signed = Hash.new
 
     arguments.each do |k, v|
@@ -19,18 +17,21 @@ module FacebookedSpecHelper
     Digest::MD5.hexdigest( arg_string + secret )
   end
 
-
-  def create_facebook_client(uid=1111222233335, api_key='myfacebookapikey', secret='myfacebooksecret')
-    @facebook_client = FacebookedClient.new(api_key, secret)
+  def create_valid_facebook_cookies(uid=1111222233335)
     cookies = {
-      "#{api_key}_user" => uid.to_s,
-      "#{api_key}_session_key" => 'user_session_key',
-      "#{api_key}_ss" => 'user_session_secret',
-      "#{api_key}_expires" => 2.hours.from_now.to_i.to_s
+      "#{@facebook_api_key}_user" => uid.to_s,
+      "#{@facebook_api_key}_session_key" => 'user_session_key',
+      "#{@facebook_api_key}_ss" => 'user_session_secret',
+      "#{@facebook_api_key}_expires" => 2.hours.from_now.to_i.to_s
     }
-    cookies[api_key] = facebook_sign_params(cookies, secret, api_key)
-    @facebook_client.validate_fb_cookies(cookies)
-    @facebook_client
+    cookies[@facebook_api_key] = facebook_sign_params(cookies, @facebook_secret, @facebook_api_key)
+    cookies
+  end
+
+  def create_facebook_client(api_key='myfacebookapikey', secret='myfacebooksecret')
+    @facebook_api_key = api_key
+    @facebook_secret = secret
+    @facebook_client = FacebookedClient.new(@facebook_api_key, @facebook_secret)
   end
 
   def mock_mini_fb_facebook_call(method, data)

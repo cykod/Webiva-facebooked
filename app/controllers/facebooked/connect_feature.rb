@@ -4,7 +4,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
 
   feature :facebooked_connect_login, :default_feature => <<-FEATURE
     <cms:no_user><cms:login_button/></cms:no_user>
-    <cms:user><cms:profile_pic/> <cms:name/> <cms:logout>log out</cms:logout></cms:user>
+    <cms:user><cms:profile_pic/> <cms:name/> <cms:logout_link>log out</cms:logout_link></cms:user>
   FEATURE
 
   def facebooked_connect_login_feature(data)
