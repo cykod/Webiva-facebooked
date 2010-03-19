@@ -83,7 +83,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
       end
 
       end_user = data[:facebooked][:fb_user].end_user
-      if end_user && end_user.first_name.blank? && end_user.last_name.blank?
+      if end_user && end_user.missing_name?
         uid = data[:facebooked][:fb_user].uid
 
         c.define_tag 'logged_in:name' do |t|
