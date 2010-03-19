@@ -4,12 +4,14 @@ class FacebookedUser < DomainModel
   cached_content
 
   belongs_to :end_user
+  validates_presence_of :uid
   validates_uniqueness_of :uid
 
   named_scope :active_users, :conditions => 'email IS NOT NULL'
 
   def self.push_facebook_user(client, myself, options={})
     return nil unless client.uid
+    return nil if myself.editor?
 
     fb_user = self.find_by_uid(client.uid)
     if fb_user.nil?
@@ -25,8 +27,14 @@ class FacebookedUser < DomainModel
     elsif ! fb_user.active?
       user = client.user
       return nil unless user && user.uid
+      return nil if myself.editor?
 
-      fb_user.update_attributes :email => user['email']
+      if myself.id.nil?
+        user_options = {:registered => true, :activated => true, :hashed_password => 'invalid'}.merge(options)
+        myself = EndUser.push_target(user['email'], user_options)
+      end
+
+      fb_user.update_attributes :email => user['email'], :end_user_id => myself.id
     end
 
     fb_user
@@ -79,7 +87,7 @@ class FacebookedUser < DomainModel
     ! self.email.blank?
   end
 
-  def deactivate
+  def deactivate!
     self.email = nil
     self.save
   end

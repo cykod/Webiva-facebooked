@@ -18,6 +18,14 @@ class FacebookedClient
   def initialize(api_key, secret)
     @api_key = api_key
     @secret = secret
+    reset
+  end
+
+  def reset
+    @uid = nil
+    @session_key = nil
+    @session_secret = nil
+    @session_expires = nil
     @fb_params = {}
   end
 
@@ -28,9 +36,11 @@ class FacebookedClient
       arguments[k.sub(namespace, 'fb_sig')] = v
     end
 
+    reset
+
     if ! arguments.empty? && MiniFB.verify_signature(@secret, arguments)
       @fb_params = arguments
-      return true
+      return ! self.expired?
     else
       return false
     end
@@ -66,6 +76,11 @@ class FacebookedClient
     end
   end
 
+  def expired?
+    return false if self.session_expires.nil?
+    self.session_expires <= Time.now
+  end
+
   def session
     @session ||= MiniFB::Session.new @api_key, @secret, self.session_key, self.uid
   end
@@ -86,7 +101,7 @@ class FacebookedClient
   end
 
   def expire_session
-    self.call('auth.expiresession')
+    self.call('auth.expireSession')
   end
 
   def has_app_permission(extended_permissions)
