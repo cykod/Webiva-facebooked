@@ -1,5 +1,6 @@
 
 class FacebookedClient
+  attr_accessor :error
   cattr_accessor :logger
   @@logger = ActiveRecord::Base.logger
 
@@ -114,14 +115,60 @@ class FacebookedClient
     self.call('fql.query', options)
   end
 
+  def facebook_app(data={})
+    return @app if @app
+    @app = Application.new(self, data)
+    @app.get_app_properties unless @app[:app_id]
+    @app
+  end
+
   def call(method, options={})
     options['session_key'] = self.session_key if self.session_key
     logger.info "Facebook API Call: #{method} with #{options}"
     begin
+      self.error = nil
       MiniFB.call(@api_key, @secret, method, options)
+    rescue FacebookError => e
+      self.error = e
+      logger.error "#{method} failed: #{e}"
     rescue Exception => e
       logger.error "#{method} failed: #{e}"
       nil
+    end
+  end
+
+  class Application
+    FIELDS = [:about_url, :app_id, :application_name, :authorize_url, :base_domain, :base_domains, :callback_url, :canvas_name, :connect_logo_url, :connect_preview_template, :connect_reclaim_url, :connect_url, :contact_email, :creator_uid, :dashboard_url, :default_column, :description, :desktop, :dev_mode, :edit_url, :email, :email_domain, :help_url, :icon_url, :iframe_enable_util, :ignore_ip_whitelist_for_ss, :info_changed_url, :installable, :ip_list, :is_mobile, :logo_url, :message_action, :post_authorize_redirect_url, :preload_fql, :privacy_url, :private_install, :profile_tab_url, :publish_action, :publish_self_action, :publish_self_url, :publish_url, :quick_transitions, :support_url, :tab_default_name, :targeted, :tos_url, :uninstall_url, :use_iframe, :video_rentals, :wide_mode]
+
+    def self.all_fields
+      FIELDS.join(",")
+    end
+
+    def initialize(client, data)
+      @client = client
+      @fb_hash = data
+    end
+
+    def [](key)
+      @fb_hash[key]
+    end
+
+    def data
+      @fb_hash
+    end
+
+    def get_app_properties
+      xml = @client.call('Admin.getAppProperties', {'properties' => self.class.all_fields, 'format' => 'XML'})
+      return unless xml
+      response = Hash.from_xml(xml)
+
+      if response['error_response']
+        @client.error = MiniFB::FaceBookError.new(response['error_response']['error_code'], response['error_response']['error_msg'])
+        return
+      end
+
+      return unless response['Admin_getAppProperties_response']
+      @fb_hash = JSON.parse(response['Admin_getAppProperties_response']).symbolize_keys
     end
   end
 end
