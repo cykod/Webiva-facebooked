@@ -12,6 +12,7 @@
 <%= f.show_error_message(:base, '') %>
 <%= render :partial => @options.options_partial, :locals => @options.options_locals(f) -%>
 <%= f.header( 'Facebooked Application Data (readonly)' ) -%>
+<%= f.text_field(:creator_name, :label => 'Creator', :readonly => true) -%>
 <%= f.text_field(:app_id, :label => 'App ID', :readonly => true) -%>
 <%= f.text_field(:application_name, :label => 'Applicaton Name', :readonly => true) -%>
 <%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :description => "Set Facebook Connect URL to #{Configuration.domain_link('/')}") -%>

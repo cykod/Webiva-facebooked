@@ -95,6 +95,12 @@ class FacebookedClient
     end
   end
 
+  def fetch_user(uid)
+    users = self.call("Users.getInfo", 'uids' => uid, 'fields' => MiniFB::User.standard_fields)
+    return nil unless users
+    users[0].symbolize_keys
+  end
+
   def clear_cookies(cookies)
     cookies.each do |k,v|
       cookies.delete k if k.to_s.include?(@api_key)

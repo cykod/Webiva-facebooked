@@ -58,7 +58,7 @@ class Facebooked::AdminController < ModuleController
   class Options < HashModel
     attr_accessor :app_id, :application_name, :connect_url, :email_domain
 
-    attributes :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}
+    attributes :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}, :creator_name => nil
 
     validates_presence_of :api_key, :secret
 
@@ -112,6 +112,12 @@ class Facebooked::AdminController < ModuleController
 
     def fetch_facebook_app_data
       self.facebook_app_data = self.facebook_app.get_app_properties || {}
+      if self.facebook_app_data[:creator_uid]
+        user = self.facebook_client.fetch_user(self.facebook_app_data[:creator_uid])
+        if user
+          self.creator_name = user[:name]
+        end
+      end
     end
   end
   
