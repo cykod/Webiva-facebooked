@@ -1,12 +1,6 @@
-<div style='width:900px;' class='admin_content clearfix'>
+<div style='width:1000px;' class='admin_content clearfix'>
 
-<div style='float:left; width:500px;'>
-<% if @options.app_id -%>
-<% else -%>
-<h4><a target="_blank" href="http://www.facebook.com/developers/createapp.php">Create Facebook Application</a></h4>
-<% end -%>
-
-<br/>
+<div style='float:left; width:520px;'>
 
 <% admin_form_for :options, @options do |f| -%>
 <%= f.show_error_message(:base, '') %>
@@ -15,10 +9,49 @@
 <%= f.text_field(:creator_name, :label => 'Creator', :readonly => true) -%>
 <%= f.text_field(:app_id, :label => 'App ID', :readonly => true) -%>
 <%= f.text_field(:application_name, :label => 'Applicaton Name', :readonly => true) -%>
-<%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :description => "Set Facebook Connect URL to #{Configuration.domain_link('/')}") -%>
-<%= f.text_field(:email_domain, :label => 'Email Domain', :readonly => true, :description => "if you send emails from  contact@webiva.com,\nthen you would set the Email Domain to webiva.com") -%>
+<%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :required => true) -%>
+<%= f.text_field(:base_domain, :label => 'Base Domain', :readonly => true) -%>
+<%= f.text_field(:email_domain, :label => 'Email Domain', :readonly => true, :required => @options.email_permission == 'required') -%>
+<%= f.text_field(:authorize_url, :label => 'Post-Authorize Callback URL', :readonly => true, :required => true) -%>
+<%= f.text_field(:uninstall_url, :label => 'Post-Remove Callback URL', :readonly => true, :required => true) -%>
 <%= f.submit_tag 'Save' %>
 <%  end -%>
+
+</div>
+
+<div style='float:left; width:460px;'>
+<br/>
+<% if @options.app_id -%>
+<h4><a target="_blank" href="http://www.facebook.com/developers/editapp.php?app_id=<%= @options.app_id %>">Edit My Facebook Application Settings</a></h4>
+<% else -%>
+<h4><a target="_blank" href="http://www.facebook.com/developers/createapp.php">Create Facebook Application</a></h4>
+<% end -%>
+<br/>
+<h2>Facebook Application Settings</h2>
+
+<br/>
+<h3>Authentication &gt;</h3>
+<ul>
+[Authentication Callback URLs]
+<li><strong>Post-Authorize Callback URL</strong>: <em><%= Configuration.domain_link('/websites/facebooked/facebook/install') %></em></li>
+<li><strong>Post-Remove Callback URL</strong>: <em><%= Configuration.domain_link('/websites/facebooked/facebook/uninstall') %></em></li>
+</ul>
+
+<br/>
+<h3>Connect &gt;</h3>
+[Facebook Connect Settings]
+<li><strong>Connect URL</strong>: <em><%= Configuration.domain_link('/') %></em></li>
+<li><strong>Base Domain</strong>: <em><%= Configuration.domain %></em><br/>* required if site uses mulitple sub domains</li>
+</ul>
+
+<br/>
+<h3>Advanced &gt;</h3>
+<ul>
+[Advanced Settings]
+<li><strong>Email Domain</strong> to the From address in your emails.<br/>
+<em>Ex: if you send emails from  contact@webiva.com, then you would set the Email Domain to webiva.com</em>
+</li>
+</ul>
 
 <% if @options.app_id -%>
 <br/>
@@ -26,33 +59,6 @@
 <p><a target="_blank" href="http://www.facebook.com/developers/createapp.php">Create Facebook Application</a></p>
 <% end -%>
 </div>
-
-<% if @options.app_id -%>
-<div style='float:left; width:350px;'>
-<br/>
-<h4><a target="_blank" href="http://www.facebook.com/developers/editapp.php?app_id=<%= @options.app_id %>">Edit My Facebook Application Settings</a></h4>
-<br/>
-<h3>Connect URL <span style="font-size:11px;">(<span style="color:red;">Required</span>)</span></h3>
-<ul>
-<li>Click on "Edit My Facebook Application Settings" above.</li>
-<li>Then in the menu on the left, click on <strong>Connect</strong>.</li>
-<li>Set the <strong>Connect URL</strong>: <%= Configuration.domain_link('/') %></li>
-<li>Now press "Save Changes"</li>
-</ul>
-
-<br/>
-
-<h3>Email Setup</h3>
-<ul>
-<li>Click on "Edit My Facebook Application Settings" above.</li>
-<li>Then in the menu on the left, click on <strong>Advanced</strong>.</li>
-<li>Set the <strong>Email Domain</strong> to the From address in your emails.<br/>
-<em>Ex: if you send emails from  contact@webiva.com, then you would set the Email Domain to webiva.com</em>
-</li>
-<li>Now press "Save Changes"</li>
-</ul>
-</div>
-<% end -%>
 
 </div>
 

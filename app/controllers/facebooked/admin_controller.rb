@@ -56,7 +56,7 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attr_accessor :app_id, :application_name, :connect_url, :email_domain
+    attr_accessor :app_id, :application_name, :connect_url, :email_domain, :authorize_url, :base_domain, :uninstall_url
 
     attributes :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}, :creator_name => nil
 
@@ -75,6 +75,8 @@ class Facebooked::AdminController < ModuleController
       else
         errors.add(:connect_url, 'is invalid') if self.facebook_app_data[:connect_url].blank? || ! self.facebook_app_data[:connect_url].include?(Configuration.domain_link('/'))
         errors.add(:email_domain, 'is not set') if self.facebook_app_data[:email_domain].blank? && self.email_permission == 'required'
+        errors.add(:authorize_url, 'is required') if self.authorize_url.blank?
+        errors.add(:uninstall_url, 'is required') if self.uninstall_url.blank?
       end
     end
 
@@ -94,6 +96,18 @@ class Facebooked::AdminController < ModuleController
       self.facebook_app_data[:email_domain]
     end
 
+    def base_domain
+      self.facebook_app_data[:base_domain]
+    end
+
+    def authorize_url
+      self.facebook_app_data[:authorize_url]
+    end
+
+    def uninstall_url
+      self.facebook_app_data[:uninstall_url]
+    end
+
     def self.email_permission_options
       [['Not Required', nil], ['Required', 'required']]
     end
@@ -111,6 +125,7 @@ class Facebooked::AdminController < ModuleController
     end
 
     def fetch_facebook_app_data
+      self.creator_name = nil
       self.facebook_app_data = self.facebook_app.get_app_properties || {}
       if self.facebook_app_data[:creator_uid]
         user = self.facebook_client.fetch_user(self.facebook_app_data[:creator_uid])
