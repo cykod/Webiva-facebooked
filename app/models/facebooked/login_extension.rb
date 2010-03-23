@@ -21,6 +21,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
         if myself.id != @fb_user.end_user_id
           paragraph_action(@fb_user.end_user.action('/facebook/connect/login'))
           process_login @fb_user.end_user
+          session[:facebook_logged_in] = true
 
           if @options.access_token_id && ! myself.has_token?(@options.access_token_id)
             return redirect_paragraph :site_node => @options.edit_account_page_id
@@ -44,6 +45,8 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
           end
         end
       end
+    elsif myself.id && session[:facebook_logged_in]
+      process_logout
     end
 
     nil

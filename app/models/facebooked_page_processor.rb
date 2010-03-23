@@ -19,9 +19,9 @@ class FacebookedPageProcessor
     output.html_set_attribute(:html_tag, {'xmlns:fb' => 'http://www.facebook.com/2008/fbml'})
     output.includes[:js] ||= []
     output.includes[:js] << '/components/facebooked/javascripts/facebook.js'
-    output.includes[:body_end] ||= ''
-    permissions = options.email_permission == 'required' ? "'email'" : 'false'
-    #output.includes[:body_end] << "<script src='#{options.feature_loader_url}' type='text/javascript'></script>\n<script type='text/javascript'>Facebooked.init('#{options.api_key}', '#{xd_receiver_url}', #{permissions});</script>\n";
-    output.includes[:body_end] << "<script src='#{options.feature_loader_url}' type='text/javascript'></script>\n<script type='text/javascript'>Facebooked.init('#{options.api_key}', '#{xd_receiver_url}');</script>\n";
+    output.includes[:body_start] ||= ''
+    permissions = options.email_permission == 'required' ? "'email'" : 'null'
+    logged_in = @controller.session[:facebook_logged_in] ? 'true' : 'false'
+    output.includes[:body_start] << "<script type='text/javascript'>Facebooked.setup('#{options.feature_loader_url}', '#{options.api_key}', '#{xd_receiver_url}', #{permissions}, #{logged_in});</script>\n";
   end
 end
