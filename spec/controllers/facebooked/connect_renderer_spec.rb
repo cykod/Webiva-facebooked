@@ -47,6 +47,17 @@ describe Facebooked::ConnectRenderer, :type => :controller do
       renderer_get @rnd, :cms_logout => 1
     end
 
+    it "should be able to logout user if not connected to facebook" do
+      mock_user
+
+      session = {:facebook_logged_in => true}
+      controller.stub!(:session).and_return(session)
+
+      @rnd = generate_page_renderer('login')
+      @rnd.should_receive(:process_logout)
+      renderer_get @rnd
+    end
+
     it "should be able to render user paragraph" do
       @rnd = generate_page_renderer('user')
       renderer_get @rnd
