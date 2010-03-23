@@ -28,6 +28,7 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
         if myself.id != @fb_user.end_user_id
           paragraph_action(@fb_user.end_user.action('/facebook/connect/login'))
           process_login @fb_user.end_user
+          session[:facebook_logged_in] = true
 
           if @options.access_token_id && ! myself.has_token?(@options.access_token_id)
             redirect_paragraph :site_node => @options.edit_account_page_id
@@ -53,8 +54,7 @@ class Facebooked::ConnectRenderer < ParagraphRenderer
           end
         end
       end
-
-    elsif params[:cms_logout]
+    elsif params[:cms_logout] || (myself.id && session[:facebook_logged_in])
       paragraph_action(myself.action('/facebook/connect/logout')) if myself.id
       process_logout
       redirect_paragraph :page
