@@ -1,16 +1,26 @@
 
-class Facebooked::FacebookController < ModuleController
+class Facebooked::FacebookController < ApplicationController
+  skip_before_filter :verify_authenticity_token, :only => [:install, :uninstall]
 
-  component_info 'Facebooked'
-                              
-  cms_admin_paths "options",
-    "Facebook Options" => { :controller => '/facebooked/admin', :action => 'options' },
-    "Options" => { :controller => '/options' },
-    "Modules" => { :controller => '/modules' },
-    "Members" => { :controller => '/members' }
+  def install
+    if request.post? && self.facebook_client.validate_fb_params(params)
+      @fb_user = FacebookedUser.find_by_uid(self.facebook_client.uid)
+      @fb_user.authorize if @fb_user
+    end
+    render :nothing => true
+  end
 
-  permit 'facebooked_manage'
+  def uninstall
+    if request.post? && self.facebook_client.validate_fb_params(params)
+      @fb_user = FacebookedUser.find_by_uid(self.facebook_client.uid)
+      @fb_user.deactivate! if @fb_user
+    end
+    render :nothing => true
+  end
 
-  public
+  protected
 
+  def facebook_client
+    @facebook_client ||= Facebooked::AdminController.facebook_client
+  end
 end

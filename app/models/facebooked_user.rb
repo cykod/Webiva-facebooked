@@ -91,4 +91,7 @@ class FacebookedUser < DomainModel
     self.email = nil
     self.save
   end
+
+  def authorize
+  end
 end
