@@ -14,30 +14,38 @@ class FacebookedUser < DomainModel
     return nil if myself.editor?
 
     fb_user = self.find_by_uid(client.uid)
-    if fb_user.nil?
+
+    if fb_user.nil? || ! fb_user.active?
       user = client.user
-      return nil unless user && user.uid
+      return nil unless user
 
-      if myself.id.nil?
-        user_options = {:registered => true, :activated => true, :hashed_password => 'invalid'}.merge(options)
-        myself = EndUser.push_target(user['email'], user_options)
+      myself = self.push_end_user(client, myself, options)
+      return nil unless myself
+
+      if fb_user
+        fb_user.update_attributes :email => user['email'], :end_user_id => myself.id
+      else
+        fb_user = self.create :uid => client.uid, :email => user['email'], :end_user_id => myself.id
       end
-
-      fb_user = self.create :uid => client.uid, :email => user['email'], :end_user_id => myself.id
-    elsif ! fb_user.active?
-      user = client.user
-      return nil unless user && user.uid
-      return nil if myself.editor?
-
-      if myself.id.nil?
-        user_options = {:registered => true, :activated => true, :hashed_password => 'invalid'}.merge(options)
-        myself = EndUser.push_target(user['email'], user_options)
-      end
-
-      fb_user.update_attributes :email => user['email'], :end_user_id => myself.id
     end
 
     fb_user
+  end
+
+  def self.push_end_user(client, myself, options)
+    if myself.id.nil?
+      user = client.user
+
+      myself = EndUser.find_by_email(user['email'])
+      return nil if myself && myself.editor?
+
+      if myself.nil? || ! myself.registered?
+        user_options = {:registered => true, :activated => true, :hashed_password => 'invalid'}.merge(options)
+        myself = EndUser.push_target(user['email'], user_options)
+      end
+    end
+
+    myself
   end
 
   def self.facebook_end_user_data(client)
