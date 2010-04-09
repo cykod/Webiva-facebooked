@@ -55,7 +55,8 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
   # Called before the feature is displayed
   def feature_data(data)
     data[:facebooked] = {
-      :fb_user => @fb_user
+      :fb_user => @fb_user,
+      :logout_url => "#{@renderer.paragraph_page_url}?cms_logout=1"
     }
   end
 
@@ -67,7 +68,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
     fb_user_tags(c, 'facebooked:user')
 
     c.link_tag("facebooked:user:logout") do |t|
-      logout_url = "?cms_logout=1"
+      logout_url = data[:facebooked][:logout_url]
       {
         :onclick => "Facebooked.logout('#{logout_url}')",
         :href => 'javascript:void(0);'
@@ -78,7 +79,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
 
     if data[:facebooked][:fb_user]
       c.link_tag("logged_in:logout") do |t|
-        logout_url = "?cms_logout=1"
+        logout_url = data[:facebooked][:logout_url]
         {
           :onclick => "Facebooked.logout('#{logout_url}')",
           :href => 'javascript:void(0);'

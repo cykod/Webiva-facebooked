@@ -14,7 +14,7 @@ class Facebooked::ConnectFeature < ParagraphFeature
       fb_user_tags(c, 'user')
 
       c.link_tag("user:logout") do |t|
-        logout_url = "?cms_logout=1"
+        logout_url = "#{data[:current_page]}?cms_logout=1"
         {
           :onclick => "Facebooked.logout('#{logout_url}')",
           :href => 'javascript:void(0);'
