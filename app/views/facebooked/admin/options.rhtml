@@ -11,7 +11,6 @@
 <%= f.text_field(:application_name, :label => 'Applicaton Name', :readonly => true) -%>
 <%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :required => true) -%>
 <%= f.text_field(:base_domain, :label => 'Base Domain', :readonly => true) -%>
-<%= f.text_field(:email_domain, :label => 'Email Domain', :readonly => true, :required => @options.email_permission == 'required') -%>
 <%= f.text_field(:authorize_url, :label => 'Post-Authorize Callback URL', :readonly => true, :required => true) -%>
 <%= f.text_field(:uninstall_url, :label => 'Post-Remove Callback URL', :readonly => true, :required => true) -%>
 <%= f.submit_tag 'Save' %>
@@ -42,15 +41,6 @@
 [Facebook Connect Settings]
 <li><strong>Connect URL</strong>: <em><%= Configuration.domain_link('/') %></em></li>
 <li><strong>Base Domain</strong>: <em><%= Configuration.domain %></em><br/>* required if site uses mulitple sub domains</li>
-</ul>
-
-<br/>
-<h3>Advanced &gt;</h3>
-<ul>
-[Advanced Settings]
-<li><strong>Email Domain</strong> to the From address in your emails.<br/>
-<em>Ex: if you send emails from  contact@webiva.com, then you would set the Email Domain to webiva.com</em>
-</li>
 </ul>
 
 <% if @options.app_id -%>

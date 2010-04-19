@@ -144,7 +144,7 @@ class FacebookedClient
   end
 
   class Application
-    FIELDS = [:about_url, :app_id, :application_name, :authorize_url, :base_domain, :base_domains, :callback_url, :canvas_name, :connect_logo_url, :connect_preview_template, :connect_reclaim_url, :connect_url, :contact_email, :creator_uid, :dashboard_url, :default_column, :description, :desktop, :dev_mode, :edit_url, :email, :email_domain, :help_url, :icon_url, :iframe_enable_util, :ignore_ip_whitelist_for_ss, :info_changed_url, :installable, :ip_list, :is_mobile, :logo_url, :message_action, :post_authorize_redirect_url, :preload_fql, :privacy_url, :private_install, :profile_tab_url, :publish_action, :publish_self_action, :publish_self_url, :publish_url, :quick_transitions, :support_url, :tab_default_name, :targeted, :tos_url, :uninstall_url, :use_iframe, :video_rentals, :wide_mode]
+    FIELDS = [:about_url, :app_id, :application_name, :authorize_url, :base_domain, :base_domains, :callback_url, :canvas_name, :connect_logo_url, :connect_preview_template, :connect_reclaim_url, :connect_url, :contact_email, :creator_uid, :dashboard_url, :default_column, :description, :desktop, :dev_mode, :edit_url, :email, :help_url, :icon_url, :iframe_enable_util, :ignore_ip_whitelist_for_ss, :info_changed_url, :installable, :ip_list, :is_mobile, :logo_url, :message_action, :post_authorize_redirect_url, :preload_fql, :privacy_url, :private_install, :profile_tab_url, :publish_action, :publish_self_action, :publish_self_url, :publish_url, :quick_transitions, :support_url, :tab_default_name, :targeted, :tos_url, :uninstall_url, :use_iframe, :video_rentals, :wide_mode]
 
     def self.all_fields
       FIELDS.join(",")
