@@ -13,6 +13,18 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
     client.validate_fb_cookies(renderer.cookies) unless client.uid
   end
 
+  def error_link_unsupported
+    self.error_message = 'Facebook link is not supported.'.t
+  end
+
+  def error_link_not_public
+    self.error_message = 'Facebook link is not visible by everyone.'.t
+  end
+
+  def error_not_owner
+    self.error_message = 'Can only share Facebook photos and albums that you own.'.t
+  end
+
   def process_request(params, opts={})
     if self.link =~ /^http:\/\/www\.facebook\.com\//
       if self.link =~ /album.php\?(.+)/
@@ -25,20 +37,20 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
           aid = value if name == 'aid'
         end
 
-        return false unless id && aid
+        return self.error_link_unsupported unless id && aid
 
         client = Facebooked::AdminController.facebook_client
         if client.uid
           user = client.user
           albums = client.call 'Photos.getAlbums', 'aids' => "#{id}_#{aid}"
-          return false if albums.empty?
+          return self.error_not_owner if albums.empty?
 
           album = albums[0]
-          return false unless album['visible'] == 'everyone'
+          return self.error_link_not_public unless album['visible'] == 'everyone'
 
           mini_photos = MiniFB::Photos.new client.session
           photos = mini_photos.get 'pids' => album['cover_pid']
-          return false if photos.empty?
+          return self.error_link_unsupported if photos.empty?
 
           self.options.photo = photos[0]
           self.options.link = album['link']
@@ -57,20 +69,20 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
           pid = value if name == 'pid'
         end
 
-        return false unless id && pid
+        return self.error_link_unsupported unless id && pid
 
         client = Facebooked::AdminController.facebook_client
         if client.uid
           mini_photos = MiniFB::Photos.new client.session
           photos = mini_photos.get 'pids' => "#{id}_#{pid}"
-          return false if photos.empty?
+          return self.error_not_owner if photos.empty?
 
           photo = photos[0]
           albums = client.call 'Photos.getAlbums', 'aids' => photo['aid']
-          return false if albums.empty?
+          return self.error_link_unsupported if albums.empty?
 
           album = albums[0]
-          return false unless album['visible'] == 'everyone'
+          return self.error_link_not_public unless album['visible'] == 'everyone'
 
           self.options.photo = photos[0]
           self.options.link = photos[0]['link']
