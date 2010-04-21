@@ -105,6 +105,10 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
     renderer.render_to_string :partial => '/facebooked/share/link/facebook', :locals => {:post => self.post, :options => self.options, :maxwidth => maxwidth, :maxheight => maxheight, :title_length => title_length, :ajax => renderer.ajax?}
   end
 
+  def preview_image_url
+    self.options.photo['src']
+  end
+
   class Options < HashModel
     attributes :photo => {}, :link => nil, :uid => nil
   end
