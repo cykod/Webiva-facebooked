@@ -65,6 +65,13 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
           photos = mini_photos.get 'pids' => "#{id}_#{pid}"
           return false if photos.empty?
 
+          photo = photos[0]
+          albums = client.call 'Photos.getAlbums', 'aids' => photo['aid']
+          return false if albums.empty?
+
+          album = albums[0]
+          return false unless album['visible'] == 'everyone'
+
           self.options.photo = photos[0]
           self.options.link = photos[0]['link']
           self.options.uid = client.uid
