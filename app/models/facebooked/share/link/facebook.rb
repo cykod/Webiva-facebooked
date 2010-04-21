@@ -25,7 +25,7 @@ class Facebooked::Share::Link::Facebook < PostStream::Share::Link::Base
     self.error_message = 'Can only share Facebook photos and albums that you own.'.t
   end
 
-  def process_request(params, opts={})
+  def process_request(renderer, params, opts={})
     if self.link =~ /^http:\/\/www\.facebook\.com\//
       if self.link =~ /album.php\?(.+)/
         query = $1
