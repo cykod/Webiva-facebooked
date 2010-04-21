@@ -1,5 +1,5 @@
 <%
-link = options.album_url ? options.album_url : post.link
+link = options.link ? options.link : post.link
 
 width = options.photo['src_width']
 height = options.photo['src_height']
@@ -23,7 +23,7 @@ if provider
 end
 
 author_tag = ''
-if options.uid
+if options.uid && ! ajax
   author_tag = content_tag(:span, 'by %s' / "<fb:name uid='#{options.uid}' linked='true' useyou='false'></fb:name>", {:class => 'author'}, false)
 end
 
@@ -35,4 +35,3 @@ end
 <div class="provider_author">
   <%= provider_tag %> <%= author_tag %>
 </div>
-
