@@ -21,6 +21,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
         if myself.id != @fb_user.end_user_id
           paragraph_action(@fb_user.end_user.action('/facebook/connect/login'))
           process_login @fb_user.end_user
+          @fb_user.update_data(self.facebook_client) unless session[:facebook_logged_in]
           session[:facebook_logged_in] = true
 
           if @options.access_token_id && ! myself.has_token?(@options.access_token_id)

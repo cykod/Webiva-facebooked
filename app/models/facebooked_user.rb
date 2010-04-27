@@ -3,7 +3,7 @@ class FacebookedUser < DomainModel
 
   cached_content
 
-  belongs_to :end_user
+  has_end_user :end_user_id, :name_column => :name
   validates_presence_of :uid
   validates_uniqueness_of :uid
 
@@ -23,9 +23,9 @@ class FacebookedUser < DomainModel
       return nil unless myself
 
       if fb_user
-        fb_user.update_attributes :email => user['email'], :end_user_id => myself.id
+        fb_user.update_attributes :email => user['email'], :end_user_id => myself.id, :first_name => user['first_name'], :last_name => user['last_name']
       else
-        fb_user = self.create :uid => client.uid, :email => user['email'], :end_user_id => myself.id
+        fb_user = self.create :uid => client.uid, :email => user['email'], :end_user_id => myself.id, :first_name => user['first_name'], :last_name => user['last_name']
       end
     end
 
@@ -101,5 +101,33 @@ class FacebookedUser < DomainModel
   end
 
   def authorize
+  end
+
+  def name
+    if self.first_name && self.last_name
+      "#{self.first_name} #{self.last_name}"
+    elsif self.first_name
+      self.first_name
+    end
+  end
+
+  def update_data(client, options={})
+    end_user_data = FacebookedUser.facebook_end_user_data(client)
+
+    can_update_end_user = false
+    if (self.end_user.first_name.blank? || self.end_user.first_name == self.first_name) &&
+        (self.end_user.last_name.blank? || self.end_user.last_name == self.last_name)
+      can_update_end_user = true
+    end
+
+    self.first_name = end_user_data[:first_name]
+    self.last_name = end_user_data[:last_name]
+    self.save
+
+    if can_update_end_user
+      self.end_user.first_name = self.first_name
+      self.end_user.last_name = self.last_name
+      self.end_user.save
+    end
   end
 end
