@@ -14,14 +14,34 @@ class FacebookedPageProcessor
     options = Facebooked::AdminController.module_options
     return if options.api_key.blank?
 
-    xd_receiver_url = '/components/facebooked/xd_receiver.htm'
-
     output.html_set_attribute(:html_tag, {'xmlns:fb' => 'http://www.facebook.com/2008/fbml'})
-    output.includes[:js] ||= []
-    output.includes[:js] << '/components/facebooked/javascripts/facebook.js'
-    output.includes[:body_start] ||= ''
+
+    output.includes[:body_end] ||= ''
     permissions = options.email_permission == 'required' ? "'email'" : 'null'
+
     logged_in = @controller.session[:facebook_logged_in] ? 'true' : 'false'
-    output.includes[:body_start] << "<script type='text/javascript'>Facebooked.setup('#{options.feature_loader_url}', '#{options.api_key}', '#{xd_receiver_url}', #{permissions}, #{logged_in});</script>\n";
+
+    body_end = <<-HTML
+<div id="fb-root"></div>
+<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId  : '#{options.api_key}',
+      status : true,
+      cookie : true,
+      xfbml  : true
+    });
+  };
+
+  (function() {
+    var e = document.createElement('script');
+    e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+    e.async = true;
+    document.getElementById('fb-root').appendChild(e);
+  }());
+</script>
+    HTML
+
+    output.includes[:body_end] << body_end
   end
 end

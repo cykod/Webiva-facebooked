@@ -47,6 +47,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
         end
       end
     elsif myself.id && session[:facebook_logged_in]
+      self.facebook_client.clear_cookies(cookies)
       process_logout
     end
 
@@ -71,7 +72,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
     c.link_tag("facebooked:user:logout") do |t|
       logout_url = data[:facebooked][:logout_url]
       {
-        :onclick => "Facebooked.logout('#{logout_url}')",
+        :onclick => "FB.logout(function(response) { window.location = '#{logout_url}';});",
         :href => 'javascript:void(0);'
       }
     end
@@ -82,7 +83,7 @@ class Facebooked::LoginExtension < Handlers::ParagraphLoginExtension
       c.link_tag("logged_in:logout") do |t|
         logout_url = data[:facebooked][:logout_url]
         {
-          :onclick => "Facebooked.logout('#{logout_url}')",
+          :onclick => "FB.logout(function(response) { window.location = '#{logout_url}';});",
           :href => 'javascript:void(0);'
         }
       end

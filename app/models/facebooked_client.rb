@@ -134,9 +134,6 @@ class FacebookedClient
     begin
       self.error = nil
       MiniFB.call(@api_key, @secret, method, options)
-    rescue FacebookError => e
-      self.error = e
-      logger.error "#{method} failed: #{e}"
     rescue Exception => e
       logger.error "#{method} failed: #{e}"
       nil

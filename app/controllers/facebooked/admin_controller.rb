@@ -2,8 +2,9 @@
 class Facebooked::AdminController < ModuleController
 
   component_info 'Facebooked', :description => 'Facebook Support', 
-                               :access => :public
-                              
+                               :access => :public,
+                               :dependencies => ['oauth']
+
   # Register a handler feature
   register_permission_category :facebooked, "Facebook" ,"Permissions related to Facebook"
   
@@ -11,9 +12,8 @@ class Facebooked::AdminController < ModuleController
                                       [ :config, 'Configure Facebook', 'Configure Facebook' ]
                                   ]
 
-  register_handler :page, :post_process, 'FacebookedPageProcessor'
-  register_handler :editor, :auth_login_feature, "Facebooked::LoginExtension"
   register_handler :post_stream, :link, 'Facebooked::Share::Link::Facebook'
+  register_handler :oauth, :provider, 'Facebooked::OauthProvider'
 
   cms_admin_paths "options",
     "Facebook Options" => { :action => 'options' },
@@ -76,8 +76,6 @@ class Facebooked::AdminController < ModuleController
       else
         errors.add(:connect_url, 'is invalid') if self.facebook_app_data[:connect_url].blank? || ! self.facebook_app_data[:connect_url].include?(Configuration.domain_link('/'))
         errors.add(:email_domain, 'is not set') if self.facebook_app_data[:email_domain].blank? && self.email_permission == 'required'
-        errors.add(:authorize_url, 'is required') if self.authorize_url.blank?
-        errors.add(:uninstall_url, 'is required') if self.uninstall_url.blank?
       end
     end
 

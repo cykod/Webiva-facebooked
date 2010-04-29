@@ -11,8 +11,6 @@
 <%= f.text_field(:application_name, :label => 'Applicaton Name', :readonly => true) -%>
 <%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :required => true) -%>
 <%= f.text_field(:base_domain, :label => 'Base Domain', :readonly => true) -%>
-<%= f.text_field(:authorize_url, :label => 'Post-Authorize Callback URL', :readonly => true, :required => true) -%>
-<%= f.text_field(:uninstall_url, :label => 'Post-Remove Callback URL', :readonly => true, :required => true) -%>
 <%= f.submit_tag 'Save' %>
 <%  end -%>
 
@@ -27,14 +25,6 @@
 <% end -%>
 <br/>
 <h2>Facebook Application Settings</h2>
-
-<br/>
-<h3>Authentication &gt;</h3>
-<ul>
-[Authentication Callback URLs]
-<li><strong>Post-Authorize Callback URL</strong>: <em><%= Configuration.domain_link('/website/facebooked/facebook/install') %></em></li>
-<li><strong>Post-Remove Callback URL</strong>: <em><%= Configuration.domain_link('/website/facebooked/facebook/uninstall') %></em></li>
-</ul>
 
 <br/>
 <h3>Connect &gt;</h3>
