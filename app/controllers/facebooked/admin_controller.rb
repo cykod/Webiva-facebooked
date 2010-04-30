@@ -14,6 +14,7 @@ class Facebooked::AdminController < ModuleController
 
   register_handler :post_stream, :link, 'Facebooked::Share::Link::Facebook'
   register_handler :oauth, :provider, 'Facebooked::OauthProvider'
+  register_handler :page, :post_process, 'FacebookedPageProcessor'
 
   cms_admin_paths "options",
     "Facebook Options" => { :action => 'options' },
@@ -75,7 +76,6 @@ class Facebooked::AdminController < ModuleController
         errors.add(:secret, 'is invalid')
       else
         errors.add(:connect_url, 'is invalid') if self.facebook_app_data[:connect_url].blank? || ! self.facebook_app_data[:connect_url].include?(Configuration.domain_link('/'))
-        errors.add(:email_domain, 'is not set') if self.facebook_app_data[:email_domain].blank? && self.email_permission == 'required'
       end
     end
 
@@ -131,6 +131,14 @@ class Facebooked::AdminController < ModuleController
         if user
           self.creator_name = user[:name]
         end
+      end
+    end
+
+    def scopes
+      if self.email_permission == 'required'
+        'email'
+      else
+        nil
       end
     end
   end

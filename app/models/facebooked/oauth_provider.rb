@@ -9,7 +9,7 @@ class Facebooked::OauthProvider < OauthProvider::Base
 
   def authorize_url
     self.session[self.session_name] = {:redirect_uri => self.redirect_uri}
-    client.web_server.authorize_url(:redirect_uri => self.redirect_uri, :scope => 'email')
+    client.web_server.authorize_url(:redirect_uri => self.redirect_uri, :scope => Facebooked::AdminController.module_options.scopes)
   end
 
   def access_token(params)
