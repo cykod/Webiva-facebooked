@@ -1,0 +1,32 @@
+<%
+link = post.link
+width = maxwidth
+
+img = tag(:img, {:src => options.data[:picture], :width => width, :alt => options.data[:name], :title => options.data[:name], :class => 'post_stream_photo'}.delete_if{|k,v| v.blank?})
+
+title = options.data[:name].blank? ? link : options.data[:name]
+title_link = content_tag(:a, truncate(title, :length => title_length), {:href => post.link, :rel => 'nofollow', :target => '_blank', :title => title})
+heading = content_tag(:div, title_link, {:class => 'title'}, false)
+
+provider = 'Facebook'
+provider_tag = ''
+if provider
+  provider_link = content_tag(:a, provider, {:href => 'http://www.facebook.com', :rel => 'nofollow', :target => '_blank'})
+  provider_tag = content_tag(:span, provider_link, {:class => 'provider'}, false)
+end
+
+author = options.author[:name]
+author_tag = ''
+if author
+  author_link = options.author[:link] ? content_tag(:a, author, {:href => options.author[:link], :rel => 'nofollow', :target => '_blank'}) : author
+  author_tag = content_tag(:span, 'by %s' / author_link, {:class => 'author'}, false)
+end
+
+%>
+<div class="facebook">
+<%= heading %>
+<%= content_tag(:a, img, {:href => link, :rel => 'nofollow', :target => '_blank'}, false) %>
+</div>
+<div class="provider_author">
+  <%= provider_tag %> <%= author_tag %>
+</div>

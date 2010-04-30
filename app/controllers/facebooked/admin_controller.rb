@@ -12,7 +12,7 @@ class Facebooked::AdminController < ModuleController
                                       [ :config, 'Configure Facebook', 'Configure Facebook' ]
                                   ]
 
-  register_handler :post_stream, :link, 'Facebooked::Share::Link::Facebook'
+  register_handler :post_stream, :share, 'Facebooked::Share::Media'
   register_handler :oauth, :provider, 'Facebooked::OauthProvider'
   register_handler :page, :post_process, 'FacebookedPageProcessor'
 
