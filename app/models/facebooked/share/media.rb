@@ -11,6 +11,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
     unless renderer.ajax?
       renderer.require_js('builder')
       renderer.require_js('/components/facebooked/javascript/album.js')
+      renderer.require_css('/components/facebooked/stylesheets/album.css')
     end
   end
 
@@ -25,7 +26,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   def render_form_elements(renderer, form, opts={})
-    output = form.hidden_field(:album_id) + '<div id="facebook_albums"></div>'
+    output = form.hidden_field(:album_id) + '<div class="facebook_album_frame"><div id="facebook_albums"></div><hr class="separator"/></div>'
     output << '<script>FacebookAlbumSelector.ready();</script>' if renderer.ajax?
     output
   end

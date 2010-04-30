@@ -1,0 +1,34 @@
+
+.facebook_album_frame {
+  width: 300px;
+}
+
+.facebook_album_frame .separator {
+  border: none;
+  clear: both;
+}
+
+#facebook_albums {
+  overflow-x: scroll;
+  height: 150px;
+  white-space: nowrap;
+}
+
+#facebook_albums .fb_album {
+  display: inline-block;
+  margin-right: 5px;
+  height: 120px;
+  border: 1px solid #fff;
+}
+
+#facebook_albums .fb_album_selected {
+  display: inline-block;
+  padding: 3px;
+  height: 120px;
+  border: 1px solid #000;
+}
+
+#facebook_albums .fb_album a {
+  display: block;
+  text-align: center;
+}
