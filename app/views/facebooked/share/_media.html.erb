@@ -1,6 +1,6 @@
 <%
 link = post.link
-width = maxwidth
+width = 128
 
 img = tag(:img, {:src => options.data[:picture], :width => width, :alt => options.data[:name], :title => options.data[:name], :class => 'post_stream_photo'}.delete_if{|k,v| v.blank?})
 
