@@ -3,22 +3,25 @@ FacebookAlbumSelector = {
   albums: new Array(),
   inited: false,
   block_id: 'facebook_albums',
+  login_id: 'facebook_login',
   heading_id: 'facebook_heading',
   form_name: 'facebook_media_',
 
-  init: function(block_id, form_name) {
+  init: function(form_name) {
     if(this.inited) {  return; }
     this.inited = true;
 
-    this.block_id = block_id;
     this.form_name = form_name;
 
+    $(this.block_id).hide();
+
     if(FB.getSession() == null) {
-      $(this.heading_id).innerHTML = 'You are not logged into Facebook or connected our application.';
+      $(this.login_id).show();
+      $(this.heading_id).hide();
       return;
     }
 
-    $(this.heading_id).innerHTML = 'Loading...';
+    $(this.heading_id).innerHTML = 'Fetching Facebook photo albums ...';
 
     FB.api('/me/albums', function(response) {
       for( var i=0; i<response.data.length; i++ ) {
@@ -114,7 +117,7 @@ FacebookAlbumSelector = {
                                   Builder.node('a', {className: 'fb_album_name', href: 'javascript:void(0);', onclick: onclick}, this.albums[i].name)));
     }
 
-    $(this.heading_id).innerHTML = 'Share your Facebook photo albums.';
+    $(this.heading_id).innerHTML = 'Share your Facebook photo albums';
     $(this.block_id).insert(Builder.node('table', {}, [imageRow, nameRow]));
     $(this.block_id).show();
   }

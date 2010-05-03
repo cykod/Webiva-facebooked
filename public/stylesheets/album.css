@@ -6,6 +6,18 @@
   background-color: #627AAD;
 }
 
+#facebook_login {
+  padding: 5px;
+  color: #fff;
+  font-weight: bold;
+  background-color: #627AAD;
+}
+
+#facebook_login a {
+  color: #fff;
+  font-weight: bold;
+}
+
 #facebook_albums {
   overflow-x: auto;
   overflow-y: hidden;

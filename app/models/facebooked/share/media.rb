@@ -26,17 +26,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   def render_form_elements(renderer, form, opts={})
-    output = form.hidden_field(:id)
-    output << form.hidden_field(:name)
-    output << form.hidden_field(:link)
-    output << form.hidden_field(:type)
-    output << form.hidden_field(:count)
-    output << form.hidden_field(:picture)
-    output << form.hidden_field(:author_id)
-    output << form.hidden_field(:author_name)
-    output << '<div class="facebook_album_frame"><div id="facebook_heading"></div><div style="display:none;" id="facebook_albums"></div></div>'
-    output << "<script>FacebookAlbumSelector.ready('#{self.options.id}');</script>" if renderer.ajax?
-    output
+    renderer.render_to_string :partial => 'facebooked/share/media_form', :locals => {:renderer => renderer, :post => self.post, :form => form, :options => self.options}
   end
 
   def process_request(renderer, params, opts={})
@@ -48,7 +38,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
   def render_button(opts={})
     text = opts['title'] || self.title
     handler = self.class.to_s.underscore
-    content_tag(:a, text, {:href => 'javascript:void(0);', :onclick => "PostStreamForm.share('#{self.type}', '#{handler}'); FacebookAlbumSelector.init('facebook_albums', '#{self.form_name}');"})
+    content_tag(:a, text, {:href => 'javascript:void(0);', :onclick => "PostStreamForm.share('#{self.type}', '#{handler}'); FacebookAlbumSelector.init('#{self.form_name}');"})
   end
 
   def image_url
