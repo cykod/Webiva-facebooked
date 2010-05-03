@@ -39,7 +39,7 @@ FacebookAlbumSelector = {
             author_id: response.data[i].from.id,
             author_name: response.data[i].from.name
           });
-          FacebookAlbumSelector.get_photo( FacebookAlbumSelector.albums[i] );
+          FacebookAlbumSelector.get_photo( FacebookAlbumSelector.albums[FacebookAlbumSelector.albums.length-1] );
         }
       }
  
