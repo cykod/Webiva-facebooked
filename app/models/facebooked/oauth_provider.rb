@@ -15,12 +15,18 @@ class Facebooked::OauthProvider < OauthProvider::Base
   def access_token(params)
     self.redirect_uri = self.session[:redirect_uri]
 
+    attempts = 1
     begin
       access_token = client.web_server.get_access_token(params[:code], :redirect_uri => self.redirect_uri)
       self.token = access_token.token
       self.refresh_token = access_token.refresh_token
       true
-    rescue OAuth2::ErrorWithResponse, OAuth2::AccessDenied, OAuth2::HTTPError => e
+    rescue OAuth2::HTTPError => e
+      attempts = attempts.succ
+      retry unless attempts > 3
+      Rails.logger.error e
+      false
+    rescue OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
       Rails.logger.error e
       false
     end
@@ -77,9 +83,21 @@ class Facebooked::OauthProvider < OauthProvider::Base
     self.session[:refresh_token] = refresh_token
   end
 
+  def get(path, params={}, headers={})
+    attempts = 1
+    begin
+      self.facebook.get(path, params, headers)
+    rescue OAuth2::HTTPError => e
+      attempts = attempts.succ
+      retry unless attempts > 3
+      raise e
+      '{}'
+    end
+  end
+
   protected
 
   def facebook_user_data
-    @facebook_user_data ||= JSON.parse(self.facebook.get('/me')).symbolize_keys
+    @facebook_user_data ||= JSON.parse(self.get('/me')).symbolize_keys
   end
 end
