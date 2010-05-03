@@ -34,7 +34,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
     output << form.hidden_field(:picture)
     output << form.hidden_field(:author_id)
     output << form.hidden_field(:author_name)
-    output << '<div class="facebook_album_frame"><div id="facebook_albums"></div><hr class="separator"/></div>'
+    output << '<div class="facebook_album_frame"><div id="facebook_heading"></div><div style="display:none;" id="facebook_albums"></div></div>'
     output << "<script>FacebookAlbumSelector.ready('#{self.options.id}');</script>" if renderer.ajax?
     output
   end

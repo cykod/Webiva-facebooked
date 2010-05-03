@@ -3,6 +3,7 @@ FacebookAlbumSelector = {
   albums: new Array(),
   inited: false,
   block_id: 'facebook_albums',
+  heading_id: 'facebook_heading',
   form_name: 'facebook_media_',
 
   init: function(block_id, form_name) {
@@ -11,6 +12,13 @@ FacebookAlbumSelector = {
 
     this.block_id = block_id;
     this.form_name = form_name;
+
+    if(FB.getSession() == null) {
+      $(this.heading_id).innerHTML = 'You are not logged into Facebook or connected our application.';
+      return;
+    }
+
+    $(this.heading_id).innerHTML = 'Loading...';
 
     FB.api('/me/albums', function(response) {
       for( var i=0; i<response.data.length; i++ ) {
@@ -59,7 +67,8 @@ FacebookAlbumSelector = {
   },
 
   select: function(id) {
-    $$('.fb_album').each(function(e) { e.className = 'fb_album' });
+    $$('.fb_album_image').each(function(e) { e.className = 'fb_album_image' });
+    $$('.fb_album_name').each(function(e) { e.className = 'fb_album_name' });
     $(this.block_id).className = '';
 
     var album = this.album(id);
@@ -76,7 +85,8 @@ FacebookAlbumSelector = {
       $(this.form_name + '_picture').value = album.picture;
       $(this.form_name + '_author_name').value = album.author_name;
       $(this.form_name + '_author_id').value = album.author_id;
-      $('fb_album_' + id).className = 'fb_album fb_album_selected';
+      $('fb_album_image_' + id).className = 'fb_album_image fb_album_image_selected';
+      $('fb_album_name_' + id).className = 'fb_album_name fb_album_name_selected';
     }
   },
 
@@ -88,17 +98,24 @@ FacebookAlbumSelector = {
       return;
     }
 
+    var imageRow = Builder.node('tr', {className: 'fb_album_images'});
+    var nameRow = Builder.node('tr', {className: 'fb_album_names'});
+
     for( var i=0; i<this.albums.length; i++ ) {
       var onclick = 'FacebookAlbumSelector.select("' + this.albums[i].id + '");';
 
-      var className = this.albums[i].id == id ? 'fb_album fb_album_selected' : 'fb_album';
-      $(this.block_id).insert( Builder.node('div', {className: className, id: 'fb_album_' + this.albums[i].id},
-                                            [
-                                             Builder.node('a', {className: 'fb_album_photo', href: 'javascript:void(0);', onclick: onclick},
-                                                          [Builder.node('img', {src: this.albums[i].picture, width: 90, alt: this.albums[i].name, title: this.albums[i].name})]),
-                                             Builder.node('a', {className: 'fb_album_name', href: 'javascript:void(0);', onclick: onclick}, this.albums[i].name)
-                                            ]
-                                           ));
+      var className = this.albums[i].id == id ? 'fb_album_image fb_album_image_selected' : 'fb_album_image';
+      imageRow.insert(Builder.node('td', {className: className, id: 'fb_album_image_' + this.albums[i].id},
+                                   Builder.node('a', {className: 'fb_album_photo', href: 'javascript:void(0);', onclick: onclick},
+                                                Builder.node('img', {src: this.albums[i].picture, width: 90, alt: this.albums[i].name, title: this.albums[i].name}))));
+
+      className = this.albums[i].id == id ? 'fb_album_name fb_album_name_selected' : 'fb_album_name';
+      nameRow.insert(Builder.node('td', {className: className, id: 'fb_album_name_' + this.albums[i].id},
+                                  Builder.node('a', {className: 'fb_album_name', href: 'javascript:void(0);', onclick: onclick}, this.albums[i].name)));
     }
+
+    $(this.heading_id).innerHTML = 'Share your Facebook photo albums.';
+    $(this.block_id).insert(Builder.node('table', {}, [imageRow, nameRow]));
+    $(this.block_id).show();
   }
 }
