@@ -8,17 +8,17 @@ class Facebooked::OauthProvider < OauthProvider::Base
   end
 
   def authorize_url
-    self.session[self.session_name] = {:redirect_uri => self.redirect_uri}
+    self.session[:redirect_uri] = self.redirect_uri
     client.web_server.authorize_url(:redirect_uri => self.redirect_uri, :scope => Facebooked::AdminController.module_options.scopes)
   end
 
   def access_token(params)
-    self.redirect_uri = self.session[self.session_name][:redirect_uri]
+    self.redirect_uri = self.session[:redirect_uri]
 
     begin
       access_token = client.web_server.get_access_token(params[:code], :redirect_uri => self.redirect_uri)
-      self.session[self.session_name][:token] = access_token.token
-      self.session[self.session_name][:refresh_token] = access_token.refresh_token
+      self.token = access_token.token
+      self.refresh_token = access_token.refresh_token
       true
     rescue OAuth2::ErrorWithResponse, OAuth2::AccessDenied, OAuth2::HTTPError => e
       Rails.logger.error e
@@ -31,7 +31,7 @@ class Facebooked::OauthProvider < OauthProvider::Base
   end
 
   def facebook
-    @facebook ||= OAuth2::AccessToken.new self.client, self.session[self.session_name][:token], self.session[self.session_name][:refresh_token]
+    @facebook ||= OAuth2::AccessToken.new self.client, self.token, self.refresh_token
   end
 
   def provider_id
@@ -59,6 +59,22 @@ class Facebooked::OauthProvider < OauthProvider::Base
       :email => self.facebook_user_data[:email],
       :profile_photo_url => self.get_profile_photo_url
     }
+  end
+
+  def token
+    self.session[:token]
+  end
+
+  def token=(token)
+    self.session[:token] = token
+  end
+
+  def refresh_token
+    self.session[:refresh_token]
+  end
+
+  def refresh_token=(refresh_token)
+    self.session[:refresh_token] = refresh_token
   end
 
   protected
