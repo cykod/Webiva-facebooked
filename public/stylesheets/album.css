@@ -44,6 +44,11 @@
   vertical-align: top;
 }
 
+#facebook_albums table td.fb_album_name a {
+  vertical-align: top;
+  color: #3B5998;
+}
+
 #facebook_albums td.fb_album_image {
   border-width: 1px;
   border-style: solid;
