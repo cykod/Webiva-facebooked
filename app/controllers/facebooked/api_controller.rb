@@ -37,9 +37,5 @@ class Facebooked::ApiController < ApplicationController
   def provider
     @provider ||= Facebooked::OauthProvider.new session
   end
-
-  def facebook
-    @facebook ||= self.provider.facebook
-  end
 end
 
