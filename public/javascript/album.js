@@ -39,12 +39,13 @@ FacebookAlbumSelector = {
           id: id,
           name: name,
           type: 'album',
-          picture: null,
           link: response[i].link,
           count: response[i].count,
-          author_id: response[i].from.id,
-          author_name: response[i].from.name,
-          picture: response[i].picture
+          author_id: response[i].author_id,
+          author_name: response[i].author_name,
+          picture: response[i].picture,
+          width: response[i].width,
+          height: response[i].height
         });
       }
  
@@ -78,6 +79,8 @@ FacebookAlbumSelector = {
       $(this.form_name + '_count').value = album.count;
       $(this.form_name + '_type').value = album.type;
       $(this.form_name + '_picture').value = album.picture;
+      $(this.form_name + '_width').value = album.width;
+      $(this.form_name + '_height').value = album.height;
       $(this.form_name + '_author_name').value = album.author_name;
       $(this.form_name + '_author_id').value = album.author_id;
       $('fb_album_image_' + id).className = 'fb_album_image fb_album_image_selected';

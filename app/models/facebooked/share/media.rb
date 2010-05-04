@@ -16,7 +16,7 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   def valid_params
-    [:id, :name, :link, :type, :count, :picture, :author_id, :author_name]
+    [:id, :name, :link, :type, :count, :width, :height, :picture, :author_id, :author_name]
   end
 
   def valid?
@@ -46,7 +46,11 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   def width
-    180
+    self.options.width || 180
+  end
+
+  def height
+    self.options.height
   end
 
   def name
@@ -82,9 +86,9 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   class Options < HashModel
-    attributes :id => nil, :name => nil, :link => nil, :type => nil, :count => nil, :picture => nil, :embeded_html => nil, :author_id => nil, :author_name => nil
+    attributes :id => nil, :name => nil, :link => nil, :type => nil, :count => nil, :picture => nil, :width => nil, :height => nil, :embeded_html => nil, :author_id => nil, :author_name => nil
 
-    integer_options :count
+    integer_options :count, :width, :height
 
     validates_presence_of :id
     validates_presence_of :name
