@@ -26,10 +26,10 @@ class FacebookedPageProcessor
 <script>
   window.fbAsyncInit = function() {
     FB.init({
-      appId  : '#{options.api_key}',
-      status : true,
-      cookie : true,
-      xfbml  : true
+      appId: '#{options.app_id}',
+      status: true,
+      cookie: true,
+      xfbml: true
     });
   };
 

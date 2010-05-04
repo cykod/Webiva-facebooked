@@ -15,49 +15,41 @@ FacebookAlbumSelector = {
 
     $(this.block_id).hide();
 
-    if(FB.getSession() == null) {
-      $(this.login_id).show();
-      $(this.heading_id).hide();
-      return;
-    }
-
     $(this.heading_id).innerHTML = 'Fetching Facebook photo albums ...';
 
-    FB.api('/me/albums', function(response) {
-      for( var i=0; i<response.data.length; i++ ) {
-        var name = response.data[i].name;
-        var id = response.data[i].id;
+    this.fetch();
+  },
+
+  fetch: function() {
+    new Ajax.Request('/website/facebooked/api/albums', {onComplete: function(transport) {
+      var response = transport.responseText.evalJSON();
+
+      if( ! response  ) {
+        $(FacebookAlbumSelector.heading_id).hide();
+        $(FacebookAlbumSelector.login_id).show();
+        return;
+      }
+
+      for( var i=0; i<response.length; i++ ) {
+        var name = response[i].name;
+        var id = response[i].id;
         if( ! name ) { name = "Photo Album " + (i+1); }
-        if( response.data[i].privacy == "everyone" && response.data[i].count > 0 ) {
-          FacebookAlbumSelector.albums.push({
-            id: id,
-            name: name,
-            type: 'album',
-            picture: null,
-            link: response.data[i].link,
-            count: response.data[i].count,
-            author_id: response.data[i].from.id,
-            author_name: response.data[i].from.name
-          });
-          FacebookAlbumSelector.get_photo( FacebookAlbumSelector.albums[FacebookAlbumSelector.albums.length-1] );
-        }
+
+        FacebookAlbumSelector.albums.push({
+          id: id,
+          name: name,
+          type: 'album',
+          picture: null,
+          link: response[i].link,
+          count: response[i].count,
+          author_id: response[i].from.id,
+          author_name: response[i].from.name,
+          picture: response[i].picture
+        });
       }
  
       FacebookAlbumSelector.ready();
-    });
-  },
-
-  get_photo: function(album) {
-    FB.api('/' + album.id, {fields: 'picture'}, function(response) {
-      album.picture = response.picture;
-    });
-  },
-
-  is_ready: function() {
-    for( var i=0; i<this.albums.length; i++ ) {
-      if( this.albums[i].picture == null ) { return false; }
-    }
-    return true;
+    }});
   },
 
   album: function(id) {
@@ -95,11 +87,6 @@ FacebookAlbumSelector = {
 
   ready: function(id) {
     if(this.inited == false) { return; }
-
-    if(this.is_ready() == false ) {
-      setTimeout('FacebookAlbumSelector.ready();', 100);
-      return;
-    }
 
     var imageRow = Builder.node('tr', {className: 'fb_album_images'});
     var nameRow = Builder.node('tr', {className: 'fb_album_names'});

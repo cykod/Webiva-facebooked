@@ -62,11 +62,19 @@ class Facebooked::Share::Media < PostStream::Share::Base
   end
 
   def provider_name
-    'Facebook'
+    "Facebook #{self.options.type.titleize}"
   end
 
   def provider_url
     'http://www.facebook.com/'
+  end
+
+  def additional_information
+    if self.options.type == 'album'
+      '%d photos' / self.options.count
+    else
+      nil
+    end
   end
 
   def embeded_html
