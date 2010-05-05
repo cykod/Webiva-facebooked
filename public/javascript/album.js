@@ -44,6 +44,7 @@ FacebookAlbumSelector = {
           author_id: response[i].author_id,
           author_name: response[i].author_name,
           picture: response[i].picture,
+          thumbnail: response[i].thumbnail,
           width: response[i].width,
           height: response[i].height
         });
@@ -100,7 +101,7 @@ FacebookAlbumSelector = {
       var className = this.albums[i].id == id ? 'fb_album_image fb_album_image_selected' : 'fb_album_image';
       imageRow.insert(Builder.node('td', {className: className, id: 'fb_album_image_' + this.albums[i].id},
                                    Builder.node('a', {className: 'fb_album_photo', href: 'javascript:void(0);', onclick: onclick},
-                                                Builder.node('img', {src: this.albums[i].picture, width: 90, alt: this.albums[i].name, title: this.albums[i].name}))));
+                                                Builder.node('img', {src: this.albums[i].thumbnail, width: 90, alt: this.albums[i].name, title: this.albums[i].name}))));
 
       className = this.albums[i].id == id ? 'fb_album_name fb_album_name_selected' : 'fb_album_name';
       nameRow.insert(Builder.node('td', {className: className, id: 'fb_album_name_' + this.albums[i].id},

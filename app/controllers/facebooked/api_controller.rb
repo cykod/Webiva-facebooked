@@ -16,6 +16,7 @@ class Facebooked::ApiController < ApplicationController
             :link => album['link'],
             :count => album['count'],
             :picture => album['photos']['data'][0]['source'],
+            :thumbnail => album['photos']['data'][0]['picture'],
             :width => album['photos']['data'][0]['width'],
             :height => album['photos']['data'][0]['height'],
             :author_name => album['from']['name'],
