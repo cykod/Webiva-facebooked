@@ -6,11 +6,7 @@
 <%= f.show_error_message(:base, '') %>
 <%= render :partial => @options.options_partial, :locals => @options.options_locals(f) -%>
 <%= f.header( 'Facebooked Application Data (readonly)' ) -%>
-<%= f.text_field(:creator_name, :label => 'Creator', :readonly => true) -%>
-<%= f.text_field(:app_id, :label => 'App ID', :readonly => true) -%>
 <%= f.text_field(:application_name, :label => 'Applicaton Name', :readonly => true) -%>
-<%= f.text_field(:connect_url, :label => 'Connect URL', :readonly => true, :required => true) -%>
-<%= f.text_field(:base_domain, :label => 'Base Domain', :readonly => true) -%>
 <%= f.submit_tag 'Save' %>
 <%  end -%>
 
@@ -21,7 +17,7 @@
 <% if @options.app_id -%>
 <h4><a target="_blank" href="http://www.facebook.com/developers/editapp.php?app_id=<%= @options.app_id %>">Edit My Facebook Application Settings</a></h4>
 <% else -%>
-<h4><a target="_blank" href="http://www.facebook.com/developers/createapp.php">Create Facebook Application</a></h4>
+<h4><a target="_blank" href="http://developers.facebook.com/setup/">Create Facebook Application</a></h4>
 <% end -%>
 <br/>
 <h2>Facebook Application Settings</h2>
@@ -36,7 +32,7 @@
 <% if @options.app_id -%>
 <br/>
 <br/>
-<p><a target="_blank" href="http://www.facebook.com/developers/createapp.php">Create Facebook Application</a></p>
+<p><a target="_blank" href="http://developers.facebook.com/setup/">Create Facebook Application</a></p>
 <% end -%>
 </div>
 

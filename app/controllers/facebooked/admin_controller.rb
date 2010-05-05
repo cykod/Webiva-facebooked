@@ -52,86 +52,64 @@ class Facebooked::AdminController < ModuleController
     Configuration.get_config_model(Options,vals)
   end
 
-  def self.facebook_client
-    options = self.module_options
-    FacebookedClient.client(options.api_key, options.secret)
-  end
-
   class Options < HashModel
-    attr_accessor :app_id, :application_name, :connect_url, :email_domain, :authorize_url, :base_domain, :uninstall_url
+    attributes :app_id => nil, :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}
 
-    attributes :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}, :creator_name => nil
-
-    validates_presence_of :api_key, :secret
+    validates_presence_of :app_id, :api_key, :secret
 
     options_form(
+                 fld(:app_id, :text_field, :label => 'App ID', :required => true),
                  fld(:api_key, :text_field, :label => 'API Key', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
                  fld(:email_permission, :select, :options => :email_permission_options, :label => 'Permission to email')
                  )
 
     def validate
-      if self.facebook_client.error
+      if self.client_access_token && self.client_data
+        self.facebook_app_data[:application_name] = self.client_data[:name]
+      else
+        errors.add(:app_id, 'is invalid')
         errors.add(:api_key, 'is invalid')
         errors.add(:secret, 'is invalid')
-      else
-        errors.add(:connect_url, 'is invalid') if self.facebook_app_data[:connect_url].blank? || ! self.facebook_app_data[:connect_url].include?(Configuration.domain_link('/'))
       end
-    end
-
-    def app_id
-      self.facebook_app_data[:app_id]
     end
 
     def application_name
       self.facebook_app_data[:application_name]
     end
 
-    def connect_url
-      self.facebook_app_data[:connect_url]
-    end
-
-    def email_domain
-      self.facebook_app_data[:email_domain]
-    end
-
-    def base_domain
-      self.facebook_app_data[:base_domain]
-    end
-
-    def authorize_url
-      self.facebook_app_data[:authorize_url]
-    end
-
-    def uninstall_url
-      self.facebook_app_data[:uninstall_url]
-    end
-
     def self.email_permission_options
       [['Not Required', nil], ['Required', 'required']]
     end
 
-    def feature_loader_url
-      'http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php/en_US'
+    def client
+      @client ||= OAuth2::Client.new(self.app_id, self.secret, :site => 'https://graph.facebook.com')
     end
 
-    def facebook_client
-      @facebook_client ||= FacebookedClient.new(self.api_key, self.secret)
-    end
+    def client_data
+      return @client_data if @client_data
 
-    def facebook_app
-      self.facebook_client.facebook_app(self.facebook_app_data)
-    end
-
-    def fetch_facebook_app_data
-      self.creator_name = nil
-      self.facebook_app_data = self.facebook_app.get_app_properties || {}
-      if self.facebook_app_data[:creator_uid]
-        user = self.facebook_client.fetch_user(self.facebook_app_data[:creator_uid])
-        if user
-          self.creator_name = user[:name]
-        end
+      begin
+        access_token = OAuth2::AccessToken.new self.client, self.client_access_token, nil
+        @client_data = JSON.parse(access_token.get("/#{self.app_id}", {:metadata => 1})).symbolize_keys
+      rescue OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
+        Rails.logger.error e
       end
+
+      @client_data
+    end
+
+    def client_access_token
+      return @client_access_token if @client_access_token
+
+      begin
+        response = self.client.request(:post, self.client.access_token_url, {:client_id => self.api_key, :client_secret => self.secret, :type => 'client_cred'})
+        params   = Rack::Utils.parse_query(response)
+        return @client_access_token = params['access_token']
+      rescue OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
+        Rails.logger.error e
+      end
+      nil
     end
 
     def scopes
