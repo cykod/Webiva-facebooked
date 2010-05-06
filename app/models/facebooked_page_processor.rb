@@ -12,7 +12,7 @@ class FacebookedPageProcessor
 
   def post_process(output)
     options = Facebooked::AdminController.module_options
-    return if options.api_key.blank?
+    return if options.app_id.blank?
 
     output.html_set_attribute(:html_tag, {'xmlns:fb' => 'http://www.facebook.com/2008/fbml'})
 
