@@ -53,15 +53,16 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :app_id => nil, :api_key => nil, :secret => nil, :email_permission => nil, :facebook_app_data => {}
+    attributes :app_id => nil, :secret => nil, :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
 
-    validates_presence_of :app_id, :api_key, :secret
+    validates_presence_of :app_id, :secret
 
     options_form(
                  fld(:app_id, :text_field, :label => 'App ID', :required => true),
-                 fld(:api_key, :text_field, :label => 'API Key', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
-                 fld(:email_permission, :select, :options => :email_permission_options, :label => 'Permission to email')
+                 fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
+                 fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
+                 fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
                  )
 
     def validate
@@ -69,7 +70,6 @@ class Facebooked::AdminController < ModuleController
         self.facebook_app_data[:application_name] = self.client_data[:name]
       else
         errors.add(:app_id, 'is invalid')
-        errors.add(:api_key, 'is invalid')
         errors.add(:secret, 'is invalid')
       end
     end
@@ -78,8 +78,61 @@ class Facebooked::AdminController < ModuleController
       self.facebook_app_data[:application_name]
     end
 
-    def self.email_permission_options
-      [['Not Required', nil], ['Required', 'required']]
+    def self.user_scopes_options
+      [ ['Email', 'email'],
+        ['Read stream', 'read_stream'],
+        ['User about me', 'user_about_me'],
+        ['User activities', 'user_activities'],
+        ['User birthday', 'user_birthday'],
+        ['User education history', 'user_education_history'],
+        ['User events', 'user_events'],
+        ['User groups', 'user_groups'],
+        ['User hometown', 'user_hometown'],
+        ['User interests', 'user_interests'],
+        ['User likes', 'user_likes'],
+        ['User location', 'user_location'],
+        ['User notes', 'user_notes'],
+        ['User online presence', 'user_online_presence'],
+        ['User photo video tags', 'user_photo_video_tags'],
+        ['User photos', 'user_photos'],
+        ['User relationships', 'user_relationships'],
+        ['User religion politics', 'user_religion_politics'],
+        ['User status', 'user_status'],
+        ['User videos', 'user_videos'],
+        ['User website', 'user_website'],
+        ['User work history', 'user_work_history'],
+        ['Read friend lists', 'read_friendlists'],
+        ['Read requests', 'read_requests']]
+    end
+
+    def self.friend_scopes_options
+      [ ['Friends activities', 'friends_activities'],
+        ['Friends birthday', 'friends_birthday'],
+        ['Friends education history', 'friends_education_history'],
+        ['Friends events', 'friends_events'],
+        ['Friends groups', 'friends_groups'],
+        ['Friends hometown', 'friends_hometown'],
+        ['Friends interests', 'friends_interests'],
+        ['Friends likes', 'friends_likes'],
+        ['Friends location', 'friends_location'],
+        ['Friends notes', 'friends_notes'],
+        ['Friends online presence', 'friends_online_presence'],
+        ['Friends photo video tags', 'friends_photo_video_tags'],
+        ['Friends photos', 'friends_photos'],
+        ['Friends relationships', 'friends_relationships'],
+        ['Friends religion politics', 'friends_religion_politics'],
+        ['Friends status', 'friends_status'],
+        ['Friends videos', 'friends_videos'],
+        ['Friends website', 'friends_website'],
+        ['Friends work history', 'friends_work_history']]
+    end
+
+    def self.publish_scopes_options
+      [ ['Publish stream', 'publish_stream'],
+        ['Create event', 'create_event'],
+        ['Rsvp event', 'rsvp_event'],
+        ['SMS', 'sms'],
+        ['Offline access', 'offline_access']]
     end
 
     def client
@@ -103,7 +156,7 @@ class Facebooked::AdminController < ModuleController
       return @client_access_token if @client_access_token
 
       begin
-        response = self.client.request(:post, self.client.access_token_url, {:client_id => self.api_key, :client_secret => self.secret, :type => 'client_cred'})
+        response = self.client.request(:post, self.client.access_token_url, {:client_id => self.app_id, :client_secret => self.secret, :type => 'client_cred'})
         params   = Rack::Utils.parse_query(response)
         return @client_access_token = params['access_token']
       rescue OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
@@ -113,11 +166,11 @@ class Facebooked::AdminController < ModuleController
     end
 
     def scopes
-      if self.email_permission == 'required'
-        'email'
-      else
-        nil
-      end
+      permissions = []
+      self.user_scopes.each { |s| permissions << s unless s.blank? }
+      self.friend_scopes.each { |s| permissions << s unless s.blank? }
+      self.publish_scopes.each { |s| permissions << s unless s.blank? }
+      permissions.empty? ? nil : permissions.join(',')
     end
   end
   
