@@ -67,14 +67,6 @@ class Facebooked::OauthProvider < OauthProvider::Base
     }
   end
 
-  def token
-    self.session[:token]
-  end
-
-  def token=(token)
-    self.session[:token] = token
-  end
-
   def refresh_token
     self.session[:refresh_token]
   end
