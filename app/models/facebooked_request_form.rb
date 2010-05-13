@@ -28,7 +28,7 @@ class FacebookedRequestForm
     def width(canvas=false)
       # if not on a facebook canvas page the iframe will be too small to display the popup
       unless canvas
-        return 605
+        return 625
       end
 
       if self.condensed
