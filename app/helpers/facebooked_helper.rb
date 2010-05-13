@@ -22,7 +22,7 @@ module FacebookedHelper
     end
     options[:content] = content
 
-    options['serverfbml'] = {:style => "width:#{form.selector.width}px"}
+    options['serverfbml'] = {:width=> form.selector.width }
 
     content = fbml_tag('multi-friend-selector', nil, form.selector.to_h)
     if form.selector.condensed
