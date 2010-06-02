@@ -109,7 +109,11 @@ FacebookAlbumSelector = {
     }
 
     $(this.heading_id).innerHTML = 'Share your Facebook photo albums';
-    $(this.block_id).insert(Builder.node('table', {}, [imageRow, nameRow]));
+    if(this.albums.length == 0) {
+      $(this.block_id).insert(Builder.node('p', {style: "text-align:center;"}, "You have no Public Photo Albums, make an Album public to post it."));
+    } else {
+      $(this.block_id).insert(Builder.node('table', {}, [imageRow, nameRow]));
+    }
     $(this.block_id).show();
   }
 }
