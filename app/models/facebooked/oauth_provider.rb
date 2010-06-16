@@ -13,6 +13,8 @@ class Facebooked::OauthProvider < OauthProvider::Base
   end
 
   def access_token(params)
+    return false unless self.session[:redirect_uri]
+
     self.redirect_uri = self.session[:redirect_uri]
 
     attempts = 1

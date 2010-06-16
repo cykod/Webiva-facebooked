@@ -9,7 +9,7 @@ class Facebooked::ApiController < ApplicationController
       return render :inline => '[]' unless response['data']
 
       albums = response['data'].collect do |album|
-        if album['privacy'] == 'everyone' && album['count'] > 0 && album['photos'] && album['photos']['data'] && album['photos']['data'][0]
+        if album['privacy'] == 'everyone' && album['count'] && album['count'] > 0 && album['photos'] && album['photos']['data'] && album['photos']['data'][0]
           {
             :id => album['id'],
             :name => album['name'],
