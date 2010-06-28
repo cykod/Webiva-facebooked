@@ -31,6 +31,9 @@ class Facebooked::OauthProvider < OauthProvider::Base
     rescue OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
       Rails.logger.error e
       false
+    rescue Timeout::Error => e
+      Rails.logger.error e
+      false
     end
   end
 
@@ -84,7 +87,7 @@ class Facebooked::OauthProvider < OauthProvider::Base
     rescue OAuth2::HTTPError => e
       attempts = attempts.succ
       retry unless attempts > 3
-      raise e
+      Rails.logger.error e
       '{}'
     end
   end
