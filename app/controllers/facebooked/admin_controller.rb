@@ -2,7 +2,7 @@
 class Facebooked::AdminController < ModuleController
 
   component_info 'Facebooked', :description => 'Facebook Support', 
-                               :access => :public,
+                               :access => :private,
                                :dependencies => ['oauth']
 
   # Register a handler feature
