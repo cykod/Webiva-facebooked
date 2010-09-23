@@ -159,7 +159,7 @@ class Facebooked::AdminController < ModuleController
         response = self.client.request(:post, self.client.access_token_url, {:client_id => self.app_id, :client_secret => self.secret, :type => 'client_cred'})
         params   = Rack::Utils.parse_query(response)
         return @client_access_token = params['access_token']
-      rescue OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
+      rescue Errno::ECONNRESET, SocketError, OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
         Rails.logger.error e
       end
       nil
