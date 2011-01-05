@@ -9,6 +9,7 @@ class Facebooked::AppRenderer < ParagraphRenderer
     return render_paragraph :text => 'Facebook Application Login' if editor?
     return render_paragraph :nothing => true if self.provider.logged_in?
 
+    Rails.logger.error login_html
     data_paragraph :type => 'text/html', :text => login_html
   end
 
@@ -23,7 +24,7 @@ class Facebooked::AppRenderer < ParagraphRenderer
 <html>
 <head>
 <script type="text/javascript">
-window.location = "#{url_for :controller => '/facebooked/client', :action => 'login', :provider => 'facebook'}";
+top.location = "#{url_for :controller => '/facebooked/client', :action => 'login'}";
 </script>
 </head>
 </html>

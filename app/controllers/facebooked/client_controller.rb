@@ -6,7 +6,7 @@ class Facebooked::ClientController < Oauth::ClientController
   def provider
     return @provider if @provider
     @provider = Facebooked::OauthProvider.new session
-    @provider.redirect_uri = url_for :action => 'callback', :provider => 'facebook', :url => '/'
+    @provider.redirect_uri = url_for :action => 'callback'
     @provider
   end
 
