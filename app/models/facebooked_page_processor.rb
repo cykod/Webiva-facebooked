@@ -29,7 +29,8 @@ class FacebookedPageProcessor
       appId: '#{options.app_id}',
       status: true,
       cookie: true,
-      xfbml: true
+      xfbml: true,
+      channelUrl: '#{Configuration.domain_link "/components/facebooked/channel.html"}'
     });
     #{'FB.Canvas.setSize();' if SiteVersion.current.id == Facebooked::AdminController.module_options.facebook_site_version_id}
   };
