@@ -53,7 +53,8 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :app_id => nil, :secret => nil, :canvas_page => nil, :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
+    attributes :app_id => nil, :secret => nil, :canvas_page => nil, :facebook_site_version_id => nil,
+      :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
 
     validates_presence_of :app_id, :secret
 
@@ -61,6 +62,7 @@ class Facebooked::AdminController < ModuleController
                  fld(:app_id, :text_field, :label => 'App ID', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
                  fld(:canvas_page, :text_field),
+                 fld(:facebook_site_version_id, :select, :options => :site_version_options),
                  fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
                  fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
                  fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
@@ -73,6 +75,10 @@ class Facebooked::AdminController < ModuleController
         errors.add(:app_id, 'is invalid')
         errors.add(:secret, 'is invalid')
       end
+    end
+
+    def site_version_options
+      SiteVersion.select_options_with_nil
     end
 
     def application_name

@@ -31,6 +31,7 @@ class FacebookedPageProcessor
       cookie: true,
       xfbml: true
     });
+    #{'FB.Canvas.setSize();' if SiteVersion.current.id == Facebooked::AdminController.module_options.facebook_site_version_id}
   };
 
   (function() {
