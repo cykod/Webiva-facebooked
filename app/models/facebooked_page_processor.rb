@@ -32,7 +32,7 @@ class FacebookedPageProcessor
       xfbml: true,
       channelUrl: '#{Configuration.domain_link "/components/facebooked/channel.html"}'
     });
-    #{'FB.Canvas.setSize();' if SiteVersion.current.id == Facebooked::AdminController.module_options.facebook_site_version_id}
+    #{'FB.Canvas.setSize();' if DomainModel.active_domain_id.to_i == Facebooked::AdminController.module_options.facebook_domain_id}
   };
 
   (function() {

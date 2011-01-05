@@ -53,7 +53,7 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :app_id => nil, :secret => nil, :canvas_page => nil, :facebook_site_version_id => nil,
+    attributes :app_id => nil, :secret => nil, :canvas_page => nil, :facebook_domain_id => nil,
       :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
 
     validates_presence_of :app_id, :secret
@@ -62,7 +62,7 @@ class Facebooked::AdminController < ModuleController
                  fld(:app_id, :text_field, :label => 'App ID', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
                  fld(:canvas_page, :text_field),
-                 fld(:facebook_site_version_id, :select, :options => :site_version_options),
+                 fld(:facebook_domain_id, :select, :options => :domain_options),
                  fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
                  fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
                  fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
@@ -77,8 +77,8 @@ class Facebooked::AdminController < ModuleController
       end
     end
 
-    def site_version_options
-      SiteVersion.select_options_with_nil
+    def domain_options
+      Domain.find(:all, :conditions => {:client_id => DomainModel.active_domain[:client_id]}).collect { |d| [d.name, d.id] }
     end
 
     def application_name
@@ -87,6 +87,20 @@ class Facebooked::AdminController < ModuleController
 
     def canvas_url
       "http://apps.facebook.com/#{self.canvas_page}/"
+    end
+
+    def canvas_setup_url
+      "http://#{self.facebook_domain_url}/"
+    end
+
+    def facebook_domain
+      return @facebook_domain if @facebook_domain
+      @facebook_domain = Domain.find_by_id(self.facebook_domain_id) if self.facebook_domain_id
+      @facebook_domain ||= Domain.find_by_id DomainModel.active_domain_id
+    end
+
+    def facebook_domain_url
+      self.facebook_domain.www_prefix ? "www.#{self.facebook_domain.name}" : self.facebook_domain.name
     end
 
     def self.user_scopes_options

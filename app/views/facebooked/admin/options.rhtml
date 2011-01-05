@@ -23,10 +23,28 @@
 <h2>Facebook Application Settings</h2>
 
 <br/>
-<h3>Connect &gt;</h3>
-[Facebook Connect Settings]
-<li><strong>Connect URL</strong>: <em><%= Configuration.domain_link('/') %></em></li>
-<li><strong>Base Domain</strong>: <em><%= Configuration.domain %></em><br/>* required if site uses mulitple sub domains</li>
+<h3>Web Site &gt;</h3>
+[Core Settings]
+<ul>
+<li><strong>Site URL</strong>: <em><%= Configuration.domain_link('/') %></em></li>
+<li><strong>Site Domain</strong>: <em><%= Configuration.domain %></em><br/>* required if site uses mulitple sub domains</li>
+</ul>
+
+<br/>
+<h3>Facebook Integration &gt;</h3>
+[Canvas]
+<ul>
+<li><strong>Canvas Page</strong>: <em>http://apps.facebook.com/&lt;Canvas Page&gt;/</em></li>
+<li><strong>Canvas URL</strong>: <em><%= @options.canvas_setup_url %></em></li>
+<li><strong>Canvas Type</strong>: <em>IFrame</em></li>
+<li><strong>IFrame Size</strong>: <em>Auto-resize</em></li>
+</ul>
+
+<br/>
+<h3>Advanced &gt;</h3>
+[Canvas]
+<ul>
+<li><strong>POST for Canvas</strong>: <em>Disabled</em></li>
 </ul>
 
 <% if @options.app_id -%>
