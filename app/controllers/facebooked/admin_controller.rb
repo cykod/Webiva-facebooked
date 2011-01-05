@@ -53,13 +53,14 @@ class Facebooked::AdminController < ModuleController
   end
 
   class Options < HashModel
-    attributes :app_id => nil, :secret => nil, :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
+    attributes :app_id => nil, :secret => nil, :canvas_page => nil, :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
 
     validates_presence_of :app_id, :secret
 
     options_form(
                  fld(:app_id, :text_field, :label => 'App ID', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
+                 fld(:canvas_page, :text_field),
                  fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
                  fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
                  fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
@@ -76,6 +77,10 @@ class Facebooked::AdminController < ModuleController
 
     def application_name
       self.facebook_app_data[:application_name]
+    end
+
+    def canvas_url
+      "http://apps.facebook.com/#{self.canvas_page}/"
     end
 
     def self.user_scopes_options

@@ -1,6 +1,6 @@
 class Facebooked::ConnectController < ParagraphController
 
-  editor_header 'Facebook Paragraphs'
+  editor_header 'Facebook Connect Paragraphs'
   
   editor_for :request_form, :name => "Facebook Request Form", :feature => :facebooked_connect_request_form
 
