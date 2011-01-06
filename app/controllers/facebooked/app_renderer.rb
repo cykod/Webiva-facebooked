@@ -8,6 +8,9 @@ class Facebooked::AppRenderer < ParagraphRenderer
   def login
     return render_paragraph :text => 'Facebook Application Login' if editor?
 
+    # rendering a facebook tab
+    return render_paragraph(:nothing => true) if self.controller.is_a?(Facebooked::TabController)
+
     if self.logged_in?
       return render_paragraph(:nothing => true) unless session[:lock_lockout]
 
