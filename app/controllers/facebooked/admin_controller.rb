@@ -82,7 +82,7 @@ class Facebooked::AdminController < ModuleController
     end
 
     def tab_page_options
-      SiteNode.page_options false, :version => self.facebook_site_version
+      [['--Select page--', nil]] + SiteNode.page_options(false, :version => self.facebook_site_version)
     end
 
     def domain_options
