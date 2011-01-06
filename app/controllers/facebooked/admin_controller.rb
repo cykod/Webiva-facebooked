@@ -66,7 +66,7 @@ class Facebooked::AdminController < ModuleController
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
                  fld(:canvas_page, :text_field),
                  fld(:facebook_domain_id, :select, :options => :domain_options),
-                 fld(:tab_id, :select, :options => :tab_page_options, :label => 'Page Tab'),
+                 fld(:tab_id, :select, :options => :tab_page_options, :label => 'Facebook Tab Page', :description => 'tab page requires a theme with Partial Template turned on in the Options'),
                  fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
                  fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
                  fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
