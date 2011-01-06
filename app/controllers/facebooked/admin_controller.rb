@@ -54,15 +54,19 @@ class Facebooked::AdminController < ModuleController
 
   class Options < HashModel
     attributes :app_id => nil, :secret => nil, :canvas_page => nil, :facebook_domain_id => nil,
-      :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {}
+      :user_scopes => [], :friend_scopes => [], :publish_scopes => [], :facebook_app_data => {},
+      :tab_id => nil
 
     validates_presence_of :app_id, :secret
+
+    page_options :tab_id
 
     options_form(
                  fld(:app_id, :text_field, :label => 'App ID', :required => true),
                  fld(:secret, :text_field, :label => 'Secret', :required => true),
                  fld(:canvas_page, :text_field),
                  fld(:facebook_domain_id, :select, :options => :domain_options),
+                 fld(:tab_id, :select, :options => :tab_page_options, :label => 'Page Tab'),
                  fld(:user_scopes, :check_boxes, :options => :user_scopes_options, :separator => '<br/>'),
                  fld(:friend_scopes, :check_boxes, :options => :friend_scopes_options, :separator => '<br/>'),
                  fld(:publish_scopes, :check_boxes, :options => :publish_scopes_options, :separator => '<br/>')
@@ -75,6 +79,10 @@ class Facebooked::AdminController < ModuleController
         errors.add(:app_id, 'is invalid')
         errors.add(:secret, 'is invalid')
       end
+    end
+
+    def tab_page_options
+      SiteNode.page_options false, :version => self.facebook_site_version
     end
 
     def domain_options
@@ -97,6 +105,10 @@ class Facebooked::AdminController < ModuleController
       return @facebook_domain if @facebook_domain
       @facebook_domain = Domain.find_by_id(self.facebook_domain_id) if self.facebook_domain_id
       @facebook_domain ||= Domain.find_by_id DomainModel.active_domain_id
+    end
+
+    def facebook_site_version
+      @facebook_site_version ||= SiteVersion.find self.facebook_domain.site_version_id
     end
 
     def facebook_domain_url
