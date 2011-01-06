@@ -3,6 +3,7 @@ class Facebooked::ConnectController < ParagraphController
   editor_header 'Facebook Connect Paragraphs'
   
   editor_for :request_form, :name => "Facebook Request Form", :feature => :facebooked_connect_request_form
+  editor_for :publish, :name => "Facebook Publish Post", :feature => :facebooked_connect_publish
 
   class RequestFormOptions < HashModel
     attributes :message => nil, :skip_page_id => nil, :type => 'invite', :choice_text => nil, :choice_page_id => nil,
@@ -62,6 +63,54 @@ class Facebooked::ConnectController < ParagraphController
       @request_form.selector.unselected_rows = self.unselected_rows
       @request_form.selector.selected_rows = self.selected_rows
       @request_form
+    end
+  end
+
+  class PublishOptions < HashModel
+    attributes :message => nil, :link => nil, :picture_file_id => nil, :name => nil, :caption => nil, 
+      :description => nil, :source_url => nil, :source_file_id => nil, :action_name => nil, :action_url => nil,
+      :privacy => 'EVERYONE', :success_page_id => nil
+
+    domain_file_options :picture_file_id, :source_file_id
+    page_options :success_page_id
+
+    options_form(
+                 fld(:message, :text_field, :description => "Default message to post"),
+                 fld(:privacy, :select, :options => :privacy_options),
+                 fld(:picture_file_id, :filemanager_image),
+                 fld(:success_page_id, :page_selector),
+                 fld('Link Options [optional]', :header),
+                 fld(:link, :text_field, :description => 'Link to share'),
+                 fld(:name, :text_field, :label => 'Link name'),
+                 fld(:caption, :text_field, :label => 'Link caption'),
+                 fld(:description, :text_field, :label => 'Link description'),
+                 fld('Source Options [optional]', :header),
+                 fld(:source_url, :text_field, :description => 'A URL to a Flash movie or video file to be embedded within the post.'),
+                 fld(:source_file_id, :filemanager_file, :description => 'A Flash movie of video file to share'),
+                 fld('Action Link [optional]', :header),
+                 fld(:action_name, :text_field),
+                 fld(:action_url, :text_field)
+                 )
+
+    def privacy_options
+      Facebooked::Feed::Post.privacy_options
+    end
+
+    def source
+      self.source_file ? self.source_file.url : self.source_url
+    end
+
+    def picture
+      self.picture_file_full_url
+    end
+
+    def post
+      return @post if @post
+      @post = Facebooked::Feed::Post.new self.to_hash.slice(:message, :link, :name, :caption, :description, :privacy)
+      @post.source = self.source
+      @post.picture = self.picture
+      @post.add_action(self.action_name, self.action_url) unless self.action_name.blank? || self.action_url.blank?
+      @post
     end
   end
 end

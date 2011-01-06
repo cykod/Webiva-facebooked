@@ -92,6 +92,14 @@ class Facebooked::OauthProvider < OauthProvider::Base
     end
   end
 
+  def post(path, params={}, headers={})
+    begin
+      self.facebook.post(path, params, headers)
+    rescue OAuth2::HTTPError => e
+      '{}'
+    end
+  end
+
   protected
 
   def facebook_user_data
