@@ -15,6 +15,7 @@ class Facebooked::AdminController < ModuleController
   register_handler :post_stream, :share, 'Facebooked::Share::Media'
   register_handler :oauth, :provider, 'Facebooked::OauthProvider'
   register_handler :page, :post_process, 'FacebookedPageProcessor'
+  register_handler :page, :before_request, 'FacebookedPageProcessor'
 
   cms_admin_paths "options",
     "Facebook Options" => { :action => 'options' },

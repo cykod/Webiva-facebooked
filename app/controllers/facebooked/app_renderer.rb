@@ -11,15 +11,7 @@ class Facebooked::AppRenderer < ParagraphRenderer
     # rendering a facebook tab
     return render_paragraph(:nothing => true) if self.controller.is_a?(Facebooked::TabController)
 
-    if self.logged_in?
-      return render_paragraph(:nothing => true) unless session[:lock_lockout]
-
-      lock_lockout = session[:lock_lockout]
-      session[:lock_lockout] = nil
-      return render_paragraph(:nothing => true) if self.lock_lockout_url == lock_lockout
-
-      return redirect_paragraph lock_lockout
-    end
+    return render_paragraph(:nothing => true) if self.logged_in?
 
     session[:lock_lockout] = self.lock_lockout_url
     data_paragraph :type => 'text/html', :text => login_html
@@ -28,12 +20,6 @@ class Facebooked::AppRenderer < ParagraphRenderer
   protected
 
   def logged_in?
-    if params[:signed_request]
-      # make sure the signed_request user and the user logged in with oauth are the same user
-      signed_request = Facebooked::SignedRequest.new params[:signed_request]
-      return false unless signed_request.valid? && signed_request.user_id && self.provider.logged_in? && self.provider.provider_id && signed_request.user_id == self.provider.provider_id
-    end
-
     self.provider.logged_in?
   end
 

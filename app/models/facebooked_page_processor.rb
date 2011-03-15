@@ -6,6 +6,12 @@ class FacebookedPageProcessor
     }
   end
 
+  def self.page_before_request_handler_info
+    {
+      :name => 'Facebook Before Request Processor'
+    }
+  end
+
   def initialize(controller)
     @controller = controller
   end
@@ -45,5 +51,52 @@ class FacebookedPageProcessor
     HTML
 
     output.includes[:body_end] << body_end
+  end
+  
+  def before_request
+    return true unless @controller.request.post?
+    return true unless @controller.params[:signed_request]
+    
+    if self.logged_in?(@controller.params)
+      lock_lockout = @controller.session[:lock_lockout] || self.lock_lockout_url
+      @controller.session[:lock_lockout] = nil
+      @controller.send(:redirect_to, lock_lockout)
+    else
+      @controller.send(:render, :text => self.login_html)
+    end
+
+    false
+  end
+
+  def logged_in?(params)
+    # make sure the signed_request user and the user logged in with oauth are the same user
+    signed_request = Facebooked::SignedRequest.new params[:signed_request]
+    return false unless signed_request.valid? && signed_request.user_id && self.provider.logged_in? && self.provider.provider_id && signed_request.user_id == self.provider.provider_id
+    self.provider.logged_in?
+  end
+
+  def provider
+    @provider ||= Facebooked::OauthProvider.new @controller.session
+  end
+
+  def login_html
+    <<-LOGIN
+<html>
+<head>
+<script type="text/javascript">
+top.location = "#{@controller.url_for :controller => '/facebooked/client', :action => 'login'}";
+</script>
+</head>
+</html>
+    LOGIN
+  end
+
+  # removes the signed_request from the url
+  def lock_lockout_url
+    url = @controller.request.request_uri
+    url, query = url.split '?'
+    query = query.split('&').map { |p| p.match(/^signed_request=/) ? nil : p }.compact.join('&') unless query.blank?
+    url = "#{url}?#{query}" unless query.blank?
+    url
   end
 end
