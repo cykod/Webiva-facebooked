@@ -44,14 +44,20 @@
 [Page Tabs]
 <ul>
 <li><strong>Tab Name</strong>: <em>Your app's name</em></li>
-<li><strong>Tab URL</strong>: <em>website/facebooked/tab</em></li>
+<li><strong>Page Tab Type</strong>
+  <br/>
+  &nbsp;&nbsp;&nbsp;<em>IFrame</em>
+  <br/>
+  &nbsp;&nbsp;&nbsp;<em>FBML</em> (requires a theme with Partial Template turned on in the Options)
+</li>
+<li><strong>Tab URL</strong>: <em><%= @options.tab_url %></em></li>
 </ul>
 
 <br/>
 <h3>Advanced &gt;</h3>
-[Canvas]
+[Authenticaton]
 <ul>
-<li><strong>POST for Canvas</strong>: <em>Disabled</em></li>
+<li><strong>Deauthorize Callback</strong>: <em><%= @options.deauthorize_url %></em></li>
 </ul>
 
 <% if @options.app_id -%>
