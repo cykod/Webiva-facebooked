@@ -29,6 +29,7 @@ class Facebooked::AppRenderer < ParagraphRenderer
     
     return render_paragraph(:nothing => true) unless self.logged_in?
 
+    @oauth_user = self.provider.push_oauth_user myself
     @friends = []
     
     # find my friends
@@ -38,6 +39,7 @@ class Facebooked::AppRenderer < ParagraphRenderer
       scope = OauthUser.scoped :conditions => ['end_user_id < ?', myself.id]
       scope = scope.scoped :conditions => {:provider => 'facebook', :provider_id => ids}
       @friends = scope.all
+      @options.reward @oauth_user, @friends
     end
     
     render_paragraph :feature => :facebooked_app_friend_rewards
