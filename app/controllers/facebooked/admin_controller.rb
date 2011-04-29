@@ -43,6 +43,12 @@ class Facebooked::AdminController < ModuleController
     end
   end
 
+  def update_users
+    @options = self.class.module_options
+    @options.update_users
+    cms_page_path ['Options','Modules', "Facebook Options"], 'Facebook User Update'
+  end
+
   def configure_facebook
     cms_page_path ['Options','Modules', "Facebook Options"], "Configure Facebook"
 
@@ -177,12 +183,15 @@ class Facebooked::AdminController < ModuleController
       @client ||= OAuth2::Client.new(self.app_id, self.secret, :site => 'https://graph.facebook.com')
     end
 
+    def facebook
+      @facebook ||= OAuth2::AccessToken.new self.client, self.client_access_token, nil
+    end
+
     def client_data
       return @client_data if @client_data
 
       begin
-        access_token = OAuth2::AccessToken.new self.client, self.client_access_token, nil
-        @client_data = JSON.parse(access_token.get("/#{self.app_id}", {:metadata => 1})).symbolize_keys
+        @client_data = JSON.parse(self.facebook.get("/#{self.app_id}", {:metadata => 1})).symbolize_keys
       rescue OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
         Rails.logger.error e
       end
@@ -210,6 +219,22 @@ class Facebooked::AdminController < ModuleController
       self.publish_scopes.each { |s| permissions << s unless s.blank? }
       permissions.empty? ? nil : permissions.join(',')
     end
-  end
-  
+    
+    def update_users(opts={})
+      OauthUser.all(:conditions => {:provider => 'facebook'}, :include => :end_user).each do |oauth_user|
+        next unless oauth_user.end_user
+        begin
+          # users are considered deauthorized if we can not return their email field
+          data = JSON.parse self.facebook.get("/#{oauth_user.provider_id}?fields=email")
+          if data['email']
+            oauth_user.end_user.elevate_user_level(EndUser::UserLevel::LEAD) if oauth_user.end_user.user_level < EndUser::UserLevel::LEAD
+          else
+            oauth_user.end_user.unsubscribe if oauth_user.end_user.user_level != EndUser::UserLevel::OPT_OUT
+          end
+        rescue Errno::ECONNRESET, SocketError, OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
+          Rails.logger.error e
+        end
+      end
+    end
+  end  
 end
