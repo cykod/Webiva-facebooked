@@ -4,6 +4,8 @@ class Facebooked::AppRenderer < ParagraphRenderer
   features '/facebooked/app_feature'
 
   paragraph :login
+  paragraph :friend_rewards
+  paragraph :friends
 
   def login
     return render_paragraph :text => 'Facebook Application Login' if editor?
@@ -15,6 +17,56 @@ class Facebooked::AppRenderer < ParagraphRenderer
 
     session[:lock_lockout] = self.lock_lockout_url
     data_paragraph :type => 'text/html', :text => login_html
+  end
+
+  def friend_rewards
+    @options = paragraph_options :friend_rewards
+    
+    if editor?
+      @friends = OauthUser.all :limit => 10, :conditions => {:provider => 'facebook'}
+      render_paragraph :feature => :facebooked_app_friend_rewards
+      return
+    end
+    
+    return render_paragraph(:nothing => true) unless self.logged_in?
+
+    @oauth_user = self.provider.push_oauth_user myself
+    @friends = []
+    
+    # find my friends
+    ids = self.provider.friends.collect { |f| f['id'] }
+    unless ids.empty?
+      # users that registered before me
+      scope = OauthUser.scoped :conditions => ['end_user_id < ?', myself.id]
+      scope = scope.scoped :conditions => {:provider => 'facebook', :provider_id => ids}
+      @friends = scope.all
+      @options.reward @oauth_user, @friends
+    end
+    
+    render_paragraph :feature => :facebooked_app_friend_rewards
+  end
+
+  def friends
+    @options = paragraph_options :friends
+    
+    if editor?
+      @friends = OauthUser.all :limit => 10, :conditions => {:provider => 'facebook'}
+      render_paragraph :feature => :facebooked_app_friends
+      return
+    end
+    
+    return render_paragraph(:nothing => true) unless self.logged_in?
+
+    @oauth_user = self.provider.push_oauth_user myself
+    @friends = []
+    
+    # find my friends
+    ids = self.provider.friends.collect { |f| f['id'] }
+    unless ids.empty?
+      @friends = OauthUser.all :conditions => {:provider => 'facebook', :provider_id => ids}
+    end
+    
+    render_paragraph :feature => :facebooked_app_friends
   end
 
   protected

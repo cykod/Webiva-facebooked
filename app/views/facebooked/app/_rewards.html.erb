@@ -1,0 +1,7 @@
+<%= f.select :rewards_handler, options.rewards_handler_options %>
+<% if options.handler -%>
+  <%= f.header options.handler_info[:name] + ' Options' %>
+  <% cms_subfields_for 'friend_rewards[data]', options.handler do |sf| %>
+    <%= render :partial => options.handler.options_partial, :locals => options.handler.options_locals(sf) -%>
+  <% end -%>
+<% end -%>

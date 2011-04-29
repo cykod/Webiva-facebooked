@@ -100,6 +100,15 @@ class Facebooked::OauthProvider < OauthProvider::Base
     end
   end
 
+  # returns an array of hashes with name and id of friends
+  def friends
+    @friends ||=
+      begin
+        res = JSON.parse self.get '/me/friends'
+        res['data'] ? res['data'] : []
+      end
+  end
+
   protected
 
   def facebook_user_data
