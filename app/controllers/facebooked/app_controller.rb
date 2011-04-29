@@ -4,17 +4,17 @@ class Facebooked::AppController < ParagraphController
   editor_header 'Facebooked Application Paragraphs'
 
   editor_for :login, :name => "Login", :no_options => true
-  editor_for :friend_rewards, :name => 'Friend Rewards'
+  editor_for :friend_rewards, :name => 'Friend Rewards', :feature => :facebooked_app_friend_rewards
+  editor_for :friends, :name => 'Friends', :no_options => true
   
   class LoginOptions < HashModel; end
+  class FriendsOptions < HashModel; end
   
   class FriendRewardsOptions < HashModel
     include HandlerActions
 
     attributes :rewards_handler => nil, :data => {}
     
-    validates_presence_of :rewards_handler
-
     options_form(
                  fld(:rewards_handler, :select, :options => :rewards_handler_options)
                  )
@@ -61,6 +61,11 @@ class Facebooked::AppController < ParagraphController
 
     def options_partial
       '/facebooked/app/rewards'
+    end
+
+    def features(c, data, base='reward')
+      return unless self.handler && self.handler.respond_to?(:features)
+      self.handler.features(c, data, base)
     end
   end
 end
