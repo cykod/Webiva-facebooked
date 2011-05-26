@@ -232,6 +232,7 @@ class Facebooked::AdminController < ModuleController
       OauthUser.all(:conditions => {:provider => 'facebook'}, :include => :end_user).each do |oauth_user|
         next unless oauth_user.end_user
         begin
+          sleep 1
           # users are considered deauthorized if we can not return their email field
           data = JSON.parse self.facebook.get("/#{oauth_user.provider_id}?fields=email")
           if data['email']
@@ -239,7 +240,7 @@ class Facebooked::AdminController < ModuleController
           else
             oauth_user.end_user.unsubscribe if oauth_user.end_user.user_level != EndUser::UserLevel::OPT_OUT
           end
-        rescue Errno::ECONNRESET, SocketError, OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied => e
+        rescue Errno::ECONNRESET, SocketError, OAuth2::HTTPError, OAuth2::ErrorWithResponse, OAuth2::AccessDenied, JSON::ParserError => e
           Rails.logger.error e
         end
       end

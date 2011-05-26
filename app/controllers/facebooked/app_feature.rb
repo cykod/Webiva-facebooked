@@ -36,6 +36,10 @@ class Facebooked::AppFeature < ParagraphFeature
       c.loop_tag('friend') { |t| data[:friends] }
       c.h_tag('friend:name') { |t| t.locals.friend.name }
       c.image_tag('friend:image') { |t| t.locals.friend.end_user.image if t.locals.friend.end_user }
+      c.link_tag('friend:profile') do |t| 
+        profile = data[:profiles][t.locals.friend.end_user_id]
+        profile.content_node.link
+      end
     end
   end
 end

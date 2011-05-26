@@ -63,7 +63,11 @@ class Facebooked::AppRenderer < ParagraphRenderer
     # find my friends
     ids = self.provider.friends.collect { |f| f['id'] }
     unless ids.empty?
-      @friends = OauthUser.all :conditions => {:provider => 'facebook', :provider_id => ids}
+      @friends = OauthUser.all :conditions => {:provider => 'facebook', :provider_id => ids}, :include => :end_user
+    end
+
+    if SiteModule.module_enabled?('user_profile')
+      @profile_entries = UserProfileEntry.fetch_entries(@friends.map(&:end_user_id).compact).index_by(&:end_user_id)
     end
     
     render_paragraph :feature => :facebooked_app_friends
