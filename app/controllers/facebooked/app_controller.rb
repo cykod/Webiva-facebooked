@@ -5,7 +5,7 @@ class Facebooked::AppController < ParagraphController
 
   editor_for :login, :name => "Login", :no_options => true
   editor_for :friend_rewards, :name => 'Friend Rewards', :feature => :facebooked_app_friend_rewards
-  editor_for :friends, :name => 'Friends', :no_options => true
+  editor_for :friends, :name => 'Friends', :no_options => true, :feature => :facebooked_app_friends
   
   class LoginOptions < HashModel; end
   class FriendsOptions < HashModel; end
