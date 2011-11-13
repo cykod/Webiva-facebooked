@@ -39,7 +39,7 @@ class Facebooked::AppFeature < ParagraphFeature
       c.link_tag('friend:profile') do |t| 
         if data[:profile_entries]
           profile = data[:profile_entries][t.locals.friend.end_user_id]
-          profile.content_node.link
+          profile.content_node.link if profile
         end
       end
     end
