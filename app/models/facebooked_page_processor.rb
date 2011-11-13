@@ -36,9 +36,11 @@ class FacebookedPageProcessor
       status: true,
       cookie: true,
       xfbml: true,
-      channelUrl: '#{Configuration.domain_link "/components/facebooked/channel.html"}'
+      channelUrl: '#{Configuration.domain_link("/components/facebooked/channel.html").gsub("http:",@controller.request.ssl? ? 'https:' : 'http:')}'
     });
     #{'FB.Canvas.setSize();' if DomainModel.active_domain_id.to_i == Facebooked::AdminController.module_options.facebook_domain_id}
+    
+    if(window.facebooked) window.facebooked();
   };
 
   (function() {
@@ -56,6 +58,7 @@ class FacebookedPageProcessor
   def before_request
     return true unless @controller.request.post?
     return true unless @controller.params[:signed_request]
+    return true if @controller.is_a?(Facebooked::TabController)
     
     if self.logged_in?(@controller.params)
       lock_lockout = @controller.session[:lock_lockout] || self.lock_lockout_url
