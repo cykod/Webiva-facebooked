@@ -10,6 +10,6 @@ class Facebooked::TabController < ModuleAppController
     return render(:nothing => true) unless Facebooked::AdminController.module_options.tab_node
     params[:path] = Facebooked::AdminController.module_options.tab_node.link[1..-1].split('/')
     handle_page
-    render :action => 'index'
+    render :action => 'index' unless performed?
   end
 end
