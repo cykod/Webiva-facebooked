@@ -84,7 +84,7 @@ class Facebooked::OauthProvider < OauthProvider::Base
     attempts = 1
     begin
       self.facebook.get(path, params, headers)
-    rescue OAuth2::HTTPError => e
+    rescue Errno::ETIMEDOUT, Errno::ECONNRESET, OAuth2::HTTPError => e
       attempts = attempts.succ
       retry unless attempts > 3
       Rails.logger.error e
@@ -95,7 +95,7 @@ class Facebooked::OauthProvider < OauthProvider::Base
   def post(path, params={}, headers={})
     begin
       self.facebook.post(path, params, headers)
-    rescue OAuth2::HTTPError => e
+    rescue Errno::ETIMEDOUT, Errno::ECONNRESET, OAuth2::HTTPError => e
       '{}'
     end
   end
